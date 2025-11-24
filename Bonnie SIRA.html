@@ -720,7 +720,25 @@ function downloadCSV(fileName, csvText) {
     closeWebpay();
     if(ok){
       alert('Pago autorizado (simulación). Se generó Boleta/Comprobante.');
-      fakeDownload('Boleta_Webpay.pdf'); clearCart();
+     downloadPDF(
+  "Boleta_Webpay.pdf",
+  "Boleta / Comprobante Webpay",
+  [
+    "Orden: WB-552199",
+    "Tipo: " + document.getElementById("purchaseType").value,
+    "Comprador: " + document.getElementById("buyerName").value,
+    "Email: " + document.getElementById("buyerEmail").value,
+    "",
+    "Detalle:",
+    ...cart.map(i => `• ${i.qty} x ${i.name} — ${money(i.price * i.qty)}`),
+    "",
+    "Total pagado: " + document.getElementById("total").innerText,
+    "Estado: AUTHORIZED",
+    "",
+    "Gracias por apoyar a Bonnie SIRA"
+  ]
+);
+; clearCart();
     }else{ alert('Pago cancelado (simulación).'); }
   }
 
@@ -729,3 +747,5 @@ function downloadCSV(fileName, csvText) {
 
 </body>
 </html>
+
+
