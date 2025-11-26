@@ -489,33 +489,6 @@
     </div>
   </section>
 
-  <!-- JUSTIFICACIÓN -->
-  <section id="especificacion" class="hidden card">
-    <h2>Justificación y especificación</h2>
-    <div class="grid">
-      <div class="card" style="grid-column:span 6;">
-        <h3>Justificación</h3>
-        <ul class="muted">
-          <li><b>Contrato y comprobante:</b> respaldo legal y trazabilidad.</li>
-          <li><b>Hoja de vacunación:</b> continuidad clínica y alertas.</li>
-          <li><b>Informe visita:</b> evidencia para aprobación/rechazo.</li>
-          <li><b>Boleta Webpay:</b> obligación tributaria.</li>
-          <li><b>Reportes:</b> KPI para gestión del refugio.</li>
-        </ul>
-      </div>
-      <div class="card" style="grid-column:span 6;">
-        <h3>Especificación</h3>
-        <ul class="muted">
-          <li><b>Formato:</b> PDF y CSV.</li>
-          <li><b>Contenido:</b> folio, fecha/hora, IDs, firma digital, QR/hash.</li>
-          <li><b>Rendimiento:</b> generación &lt; 2s.</li>
-          <li><b>Seguridad:</b> acceso por rol + bitácora.</li>
-          <li><b>Webpay:</b> PENDING/AUTHORIZED/FAILED; pospago envía PDF.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
   <footer>Prototipo educativo · Cute minimal · Bonnie SIRA ©</footer>
 </div>
 
@@ -602,7 +575,7 @@
 
 
 <script>
-  const sections = ['home','tienda','carro','salidas','especificacion'];
+  const sections = ['home','tienda','carro','salidas'];
   function show(id){
     sections.forEach(s=>{
       document.getElementById(s).classList.toggle('hidden', s!==id);
