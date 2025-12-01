@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bonnie SIRA — Prototipo (Salidas + Carro Webpay)</title>
+  <title>Bonnie SIRA — Prototipo (Entradas, Salidas + Carro Webpay)</title>
   <style>
     :root{
       --lav:#7a77ff;
@@ -95,7 +95,6 @@
     .dialog{background:white;width:min(560px,92vw);border-radius:18px;padding:14px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.25);}
     .dialog header{position:unset;background:transparent;color:var(--ink);box-shadow:none;padding:0;display:flex;justify-content:space-between;}
     .x{border:0;background:transparent;font-size:22px;cursor:pointer;}
-    .code{background:#0b1020;color:#e9f1ff;padding:10px;border-radius:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;overflow:auto;}
 
     footer{color:var(--muted);font-size:12px;text-align:center;margin-top:14px;}
 
@@ -108,6 +107,29 @@
 </head>
 <body>
 
+<div id="loginScreen" style="
+  position:fixed; inset:0; background:#f6f7ff;
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999;
+">
+  <div style="background:white; padding:24px; border-radius:16px; width:300px;
+              box-shadow:0 10px 40px rgba(0,0,0,.1); border:1px solid #eceefe;">
+    <h2 style="text-align:center; margin-top:0;">Ingreso al sistema</h2>
+
+    <label>Selecciona tu rol</label>
+    <select id="roleSelect" style="width:100%; padding:10px; border-radius:12px; margin-bottom:16px;">
+      <option value="adoptante">Adoptante</option>
+      <option value="admin">Funcionario Refugio</option>
+    </select>
+
+    <button onclick="login()" style="
+      width:100%; padding:10px; border-radius:12px; background:#7a77ff;
+      color:white; font-weight:700; border:none; cursor:pointer;
+    ">Ingresar</button>
+  </div>
+</div>
+
+
 <header>
   <div class="brand">
     <div class="paw">🐾</div>
@@ -118,9 +140,11 @@
   </div>
   <nav>
     <button id="tab-home" class="active" onclick="show('home')">🏠 Inicio</button>
+    <button id="tab-entradas" onclick="show('entradas')">📥 Formulario de Adopción</button>
     <button id="tab-tienda" onclick="show('tienda')">🛍️ Tienda/Donar</button>
     <button id="tab-carro" onclick="show('carro')">🧺 Carro <span id="badge" class="chip" style="background:#fff;color:var(--lav);">0</span></button>
     <button id="tab-salidas" onclick="show('salidas')">📄 Salidas</button>
+    <button class="btn secondary" onclick="logout()">Cerrar sesión</button>
   </nav>
 </header>
 
@@ -129,7 +153,7 @@
   <!-- HOME -->
   <section id="home" class="card">
     <h2>Bienvenida</h2>
-    <p class="muted">Prototipo de salidas del sistema Bonnie SIRA + carro de compras con integración Webpay simulada.</p>
+    <p class="muted">Prototipo de entradas y salidas del sistema Bonnie SIRA + carro de compras con integración Webpay simulada.</p>
     <div class="spacer"></div>
     <div class="grid">
       <div class="card" style="grid-column:span 4;">
@@ -152,6 +176,76 @@
         <div class="row"><span class="chip">Carro</span><span class="chip">Webpay</span></div>
         <div class="spacer"></div>
         <button class="btn ghost" onclick="show('tienda')">Ir a tienda</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTRADAS (FUNCIONAL) -->
+  <section id="entradas" class="hidden card">
+    <h2>Formulario de Adopción</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:span 6;">
+        <h3>Datos del adoptante</h3>
+        <label>Nombre completo</label>
+        <input id="inNombre" placeholder="Ej: Bárbara Valenzuela" required />
+        <label>RUT</label>
+        <input id="inRut" placeholder="xx.xxx.xxx-x" required />
+        <label>Correo electrónico</label>
+        <input id="inCorreo" type="email" placeholder="ejemplo@correo.cl" required />
+        <label>Teléfono</label>
+        <input id="inTelefono" type="tel" placeholder="+56 9 xxxx xxxx" />
+
+        <h3>Datos del animal</h3>
+        <label>Nombre del animal</label>
+        <input id="inAnimalNombre" placeholder="Ej: Bonnie" />
+        <label>ID / Microchip</label>
+        <input id="inMicrochip" placeholder="Opcional" />
+
+        <h3>Proceso</h3>
+        <label>Tipo de solicitud</label>
+        <select id="inTipoSolicitud">
+          <option value="adopcion">Adopción</option>
+          <option value="visita">Visita domiciliaria</option>
+          <option value="transito">Hogar temporal</option>
+        </select>
+        <label>Fecha propuesta de visita / entrega</label>
+        <input id="inFecha" type="date" />
+        <label>Observaciones</label>
+        <textarea id="inObs" rows="3" placeholder="Información adicional"></textarea>
+
+        <div class="spacer"></div>
+        <div class="row">
+          <button class="btn" onclick="registrarEntrada()">Registrar</button>
+          <button class="btn secondary" onclick="limpiarEntrada()">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="card admin-only" style="grid-column:span 6;">
+        <h3>Última entrada registrada</h3>
+        <div id="entradaPreview" class="muted">
+          No hay registros aún.
+        </div>
+
+        <div class="card admin-only" style="grid-column:span 6;">
+        <h3>Historial (mock)</h3>
+        <div class="spacer"></div>
+	<table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Adoptante</th>
+              <th>Animal</th>
+              <th>Tipo</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEntradas">
+          </tbody>
+        </table>
+
+        <div class="spacer"></div>
+        <button class="btn secondary" onclick="downloadEntradasJSON()">
+          Descargar entradas (JSON)
+        </button>
       </div>
     </div>
   </section>
@@ -300,31 +394,27 @@
         <div class="row">
           <button class="btn" onclick="previewDoc('Comprobante de adopción')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Comprobante_Adopcion.pdf',
-    'Comprobante de adopción',
-    [
-      	'Este documento funciona como evidencia formal del traspaso al nuevo hogar.',
-  	'Incluye datos esenciales que permiten al refugio llevar un control interno del caso,',
-  	'favoreciendo la supervisión posterior y disminuyendo riesgos de reincidencia o abandono.',
-  	'',
-  	'Elementos principales:',
-  	'• Identificación del animal.',
-  	'• Datos del adoptante.',
-  	'• Fecha y lugar de entrega.',
-  	'• Responsable del refugio a cargo de la entrega.',
-  	'',
-  	'El comprobante sirve además como punto de partida para monitorear el bienestar del animal',
- 	 'tras su adopción, facilitando seguimientos y contactos posteriores.',
-  	'',
-  	'Firmas:',
-  	'Adoptante: ______________________________',
-  	'Refugio Bonnie SIRA: ____________________'
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Comprobante_Adopcion.pdf',
+              'Comprobante de adopción',
+              [
+                'Este documento funciona como evidencia formal del traspaso al nuevo hogar.',
+                'Incluye datos esenciales que permiten al refugio llevar un control interno del caso,',
+                'favoreciendo la supervisión posterior y disminuyendo riesgos de reincidencia o abandono.',
+                '',
+                'Elementos principales:',
+                '• Identificación del animal.',
+                '• Datos del adoptante.',
+                '• Fecha y lugar de entrega.',
+                '• Responsable del refugio a cargo de la entrega.',
+                '',
+                'Firmas:',
+                'Adoptante: ______________________________',
+                'Refugio Bonnie SIRA: ____________________'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
 
@@ -334,27 +424,26 @@
         <div class="row">
           <button class="btn" onclick="previewDoc('Contrato de adopción')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Contrato_Adopcion.pdf',
-    'Contrato de adopción',
-    [
-      'Folio: CA-000234',
-      'Adoptante: Nombre Apellido (RUT xx.xxx.xxx-x)',
-      'Animal: Bonnie (Canina, 2 años, microchip 12345)',
-      '',
-      'Cláusulas principales:',
-      '• Cuidado responsable y controles veterinarios.',
-      '• Prohibición de abandono o maltrato.',
-      '• Seguimiento post-adopción por 6 meses.',
-      '',
-      'Firmas:',
-      'Adoptante: ____________________',
-      'Refugio: ______________________'
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Contrato_Adopcion.pdf',
+              'Contrato de adopción',
+              [
+                'Folio: CA-000234',
+                'Adoptante: Nombre Apellido (RUT xx.xxx.xxx-x)',
+                'Animal: Bonnie (Canina, 2 años, microchip 12345)',
+                '',
+                'Cláusulas principales:',
+                '• Cuidado responsable y controles veterinarios.',
+                '• Prohibición de abandono o maltrato.',
+                '• Seguimiento post-adopción por 6 meses.',
+                '',
+                'Firmas:',
+                'Adoptante: ____________________',
+                'Refugio: ______________________'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
 
@@ -364,63 +453,59 @@
         <div class="row">
           <button class="btn" onclick="previewDoc('Hoja de vacunación')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Hoja_Vacunación.pdf',
-    'Hoja de Vacunación',
-    [
-      'Registro de vacunación del animal',
-  	'',
-  	'Este documento mantiene el historial de inmunización y controles preventivos.',
-  	'Favorece la continuidad clínica y facilita las consultas veterinarias posteriores.',
-  	'Además asegura que el animal cumple con las medidas sanitarias mínimas requeridas.',
-  	'',
-  	'Incluye:',
-  	'• Esquema de vacunas aplicadas.',
-  	'• Próximas fechas indicadas.',
-  	'• Observaciones clínicas relevantes.',
-  	'• Identificación del veterinario o responsable.',
-  	'',
-  	'Este registro es fundamental para garantizar la salud del animal durante su traslado',
-  	'a su nuevo entorno familiar.',
-  	''
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Hoja_Vacunacion.pdf',
+              'Hoja de Vacunación',
+              [
+                'Registro de vacunación del animal',
+                '',
+                'Este documento mantiene el historial de inmunización y controles preventivos.',
+                'Favorece la continuidad clínica y facilita las consultas veterinarias posteriores.',
+                'Además asegura que el animal cumple con las medidas sanitarias mínimas requeridas.',
+                '',
+                'Incluye:',
+                '• Esquema de vacunas aplicadas.',
+                '• Próximas fechas indicadas.',
+                '• Observaciones clínicas relevantes.',
+                '• Identificación del veterinario o responsable.',
+                '',
+                'Este registro es fundamental para garantizar la salud del animal durante su traslado',
+                'a su nuevo entorno familiar.'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
 
-      <div class="card" style="grid-column:span 6;">
+      <div class="card admin-only" style="grid-column:span 6;">
         <h3>Informe visita domiciliaria</h3>
         <p class="muted">Checklist + evidencias.</p>
         <div class="row">
           <button class="btn" onclick="previewDoc('Informe visita domiciliaria')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Informe_Visita.pdf',
-    'Informe de Visita',
-    [
-      	'Evaluación del entorno del adoptante',
- 	'',
-  	'El informe registra las condiciones observadas en el hogar del solicitante.',
- 	'Permite determinar si el espacio es adecuado y si cumple los requisitos básicos de',
-  	'seguridad, bienestar y cuidados para el animal.',
-  	'',
-  	'Componentes del informe:',
-  	'• Condiciones del hogar.',
-  	'• Seguridad del entorno.',
-  	'• Disponibilidad de tiempo y recursos.',
-  	'• Impresiones generales del evaluador.',
-  	'',
-  	'Este documento respalda la decisión de aprobar o rechazar la adopción, basándose',
-  	'en criterios de bienestar animal.',
-  	''
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Informe_Visita.pdf',
+              'Informe de Visita',
+              [
+                'Evaluación del entorno del adoptante',
+                '',
+                'El informe registra las condiciones observadas en el hogar del solicitante.',
+                'Permite determinar si el espacio es adecuado y si cumple los requisitos básicos de',
+                'seguridad, bienestar y cuidados para el animal.',
+                '',
+                'Componentes del informe:',
+                '• Condiciones del hogar.',
+                '• Seguridad del entorno.',
+                '• Disponibilidad de tiempo y recursos.',
+                '• Impresiones generales del evaluador.',
+                '',
+                'Este documento respalda la decisión de aprobar o rechazar la adopción, basándose',
+                'en criterios de bienestar animal.'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
 
@@ -430,65 +515,59 @@
         <div class="row">
           <button class="btn" onclick="previewDoc('Boleta / Comprobante Webpay')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Boleta_Webpay.pdf',
-    'Boleta de compra',
-    [
-      'Folio: CA-000234',
-      'Comprador: Nombre Apellido (RUT xx.xxx.xxx-x)',
-      'Animal: Bonnie (Canina, 2 años, microchip 12345)',
-      '',
-      'Cláusulas principales:',
-      '• Cuidado responsable y controles veterinarios.',
-      '• Prohibición de abandono o maltrato.',
-      '• Seguimiento post-adopción por 6 meses.',
-      '',
-      'Firmas:',
-      'Adoptante: ____________________',
-      'Refugio: ______________________'
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Boleta_Webpay.pdf',
+              'Boleta de compra',
+              [
+                'Folio: CA-000234',
+                'Comprador: Nombre Apellido (RUT xx.xxx.xxx-x)',
+                'Animal: Bonnie (Canina, 2 años, microchip 12345)',
+                '',
+                'Detalle de cobro asociado al proceso de adopción o donación realizado a través del sistema.',
+                '',
+                'Firmas:',
+                'Comprador: ____________________',
+                'Refugio: ______________________'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
 
-      <div class="card" style="grid-column:span 6;">
-        <h3>Reportes de gestión (CSV)</h3>
+      <div class="card admin-only" style="grid-column:span 6;">
+        <h3>Reportes de gestión (PDF/CSV)</h3>
         <p class="muted">KPI adopciones y donaciones.</p>
         <div class="row">
           <button class="btn" onclick="previewDoc('Reporte de gestión')">Vista previa</button>
           <button class="btn secondary"
-  onclick="downloadPDF(
-    'Repoprte_Gestión.pdf',
-    'Reporte de Gestión',
-    [
-      'Indicadores administrativos del refugio',
-  	'',
- 	'Estos reportes permiten a la administración revisar cifras clave del funcionamiento',
- 	'del refugio. Facilitan evaluar resultados, medir la cantidad de adopciones realizadas,',
-  	'analizar la efectividad de campañas y apoyar la planificación interna.',
-  	'',
-  	'Incluyen:',
- 	'• Estadísticas de adopciones.',
-  	'• Movimientos de donaciones.',
-  	'• Control de insumos o recursos.',
-  	'• Comparaciones por período.',
-  	'',
-  	'Los reportes sirven como base para la toma de decisiones y asignación de recursos.',
-  	''
-    ]
-  )">
-  Exportar PDF
-</button>
-
+            onclick="downloadPDF(
+              'Reporte_Gestion.pdf',
+              'Reporte de Gestión',
+              [
+                'Indicadores administrativos del refugio',
+                '',
+                'Estos reportes permiten a la administración revisar cifras clave del funcionamiento',
+                'del refugio. Facilitan evaluar resultados, medir la cantidad de adopciones realizadas,',
+                'analizar la efectividad de campañas y apoyar la planificación interna.',
+                '',
+                'Incluyen:',
+                '• Estadísticas de adopciones.',
+                '• Movimientos de donaciones.',
+                '• Control de insumos o recursos.',
+                '• Comparaciones por período.',
+                '',
+                'Los reportes sirven como base para la toma de decisiones y asignación de recursos.'
+              ]
+            )">
+            Exportar PDF
+          </button>
         </div>
       </div>
     </div>
   </section>
 
-  <footer>Prototipo educativo · Cute minimal · Bonnie SIRA ©</footer>
+  <footer>Prototipo educativo · Bonnie SIRA ©</footer>
 </div>
 
 <!-- Modal documento -->
@@ -503,34 +582,19 @@
     <div class="row">
       <button class="btn secondary" onclick="closeModal()">Cerrar</button>
       <button class="btn secondary"
-  onclick="downloadPDF(
-    'Contrato_Adopcion.pdf',
-    'Contrato de adopción',
-    [
-      'Este contrato informa y concientiza sobre la tenencia responsable de mascotas, fomentando el cuidado',
-      'responsable, la salud del animal y su bienestar a largo plazo.',
-      '',
-      'Función del contrato:',
-      '• Define las obligaciones del adoptante.',
-      '• Formaliza el vínculo entre adoptante y refugio.',
-      '• Ayuda a prevenir el abandono.',
-      '• Establece reglas de seguimiento post-adopción.',
-      '',
-      'Cláusulas principales:',
-      '1. El adoptante se compromete a brindar cuidados generales, alimentación adecuada y controles veterinarios.',
-      '2. El adoptante deberá mantener al día vacunas y desparasitaciones.',
-      '3. El adoptante no podrá maltratar, abandonar o ceder al animal sin notificar al refugio.',
-      '4. El refugio podrá realizar seguimiento durante los primeros meses.',
-      '5. En caso de incumplimiento, el refugio puede solicitar la restitución del animal.',
-      '',
-      'Firmas:',
-      'Adoptante: ______________________________',
-      'Refugio Bonnie SIRA: ____________________'
-    ]
-  )">
-  Exportar PDF
-</button>
-
+        onclick="downloadPDF(
+          'Contrato_Adopcion.pdf',
+          'Contrato de adopción',
+          [
+            'Este contrato informa y concientiza sobre la tenencia responsable de mascotas.',
+            '',
+            'Firmas:',
+            'Adoptante: ______________________________',
+            'Refugio Bonnie SIRA: ____________________'
+          ]
+        )">
+        Exportar PDF
+      </button>
     </div>
   </div>
 </div>
@@ -569,12 +633,42 @@
   </div>
 </div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-
 <script>
-  const sections = ['home','tienda','carro','salidas'];
+function login() {
+  const role = document.getElementById("roleSelect").value;
+  localStorage.setItem("userRole", role);
+
+  document.getElementById("loginScreen").style.display = "none";
+  aplicarRoles(role);
+}
+
+function aplicarRoles(role) {
+   document.querySelectorAll(".admin-only")
+    .forEach(e => e.style.display = (role === "admin" ? "block" : "none"));
+
+   if (role === "adoptante") {
+    document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");
+  }
+}
+
+function logout() {
+  localStorage.removeItem("userRole");
+  document.getElementById("loginScreen").style.display = "flex";
+}
+
+
+window.onload = () => {
+  const role = localStorage.getItem("userRole");
+  if (role) {
+    document.getElementById("loginScreen").style.display = "none";
+    aplicarRoles(role);
+  }
+};  
+
+const sections = ['home','entradas','tienda','carro','salidas'];
+
   function show(id){
     sections.forEach(s=>{
       document.getElementById(s).classList.toggle('hidden', s!==id);
@@ -583,23 +677,135 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
+  // ----- ENTRADAS -----
+  const entradas = [];
+
+  function registrarEntrada(){
+    const nombre = document.getElementById('inNombre').value.trim();
+    const rut = document.getElementById('inRut').value.trim();
+    const correo = document.getElementById('inCorreo').value.trim();
+    const telefono = document.getElementById('inTelefono').value.trim();
+    const animal = document.getElementById('inAnimalNombre').value.trim();
+    const microchip = document.getElementById('inMicrochip').value.trim();
+    const tipo = document.getElementById('inTipoSolicitud').value;
+    const fecha = document.getElementById('inFecha').value;
+    const obs = document.getElementById('inObs').value.trim();
+
+    if(!nombre || !rut || !correo){
+      alert('Nombre, RUT y correo son obligatorios.');
+      return;
+    }
+
+    const entrada = {
+      fechaRegistro: new Date().toLocaleString('es-CL'),
+      nombre, rut, correo, telefono,
+      animal, microchip, tipo, fecha, obs
+    };
+
+    entradas.push(entrada);
+    actualizarEntradas();
+    limpiarEntrada();
+  }
+
+  function limpiarEntrada(){
+    document.getElementById('inNombre').value = '';
+    document.getElementById('inRut').value = '';
+    document.getElementById('inCorreo').value = '';
+    document.getElementById('inTelefono').value = '';
+    document.getElementById('inAnimalNombre').value = '';
+    document.getElementById('inMicrochip').value = '';
+    document.getElementById('inTipoSolicitud').value = 'adopcion';
+    document.getElementById('inFecha').value = '';
+    document.getElementById('inObs').value = '';
+  }
+
+  function actualizarEntradas(){
+    if(entradas.length === 0){
+      document.getElementById('entradaPreview').textContent = 'No hay registros aún.';
+      document.getElementById('tablaEntradas').innerHTML = '';
+      return;
+    }
+
+    const ultima = entradas[entradas.length - 1];
+    document.getElementById('entradaPreview').innerHTML = `
+      <p><b>Fecha registro:</b> ${ultima.fechaRegistro}</p>
+      <p><b>Adoptante:</b> ${ultima.nombre} (${ultima.rut})</p>
+      <p><b>Correo:</b> ${ultima.correo}</p>
+      <p><b>Animal:</b> ${ultima.animal || 'N/A'} ${ultima.microchip ? '(Chip: '+ultima.microchip+')' : ''}</p>
+      <p><b>Tipo:</b> ${ultima.tipo}</p>
+      <p><b>Fecha propuesta:</b> ${ultima.fecha || 'Sin definir'}</p>
+      <p><b>Obs.:</b> ${ultima.obs || 'Sin observaciones'}</p>
+    `;
+
+    const tbody = document.getElementById('tablaEntradas');
+    tbody.innerHTML = '';
+    entradas.slice(-5).reverse().forEach(e=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${e.fechaRegistro}</td>
+        <td>${e.nombre}</td>
+        <td>${e.animal || 'N/A'}</td>
+        <td>${e.tipo}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function downloadEntradasJSON(){
+    if(entradas.length === 0){
+      alert('No hay entradas registradas para exportar.');
+      return;
+    }
+    const dataStr = JSON.stringify(entradas, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "entradas_adopcion.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ----- CARRO / TIENDA -----
   const cart = [];
   const badge = document.getElementById('badge');
-  function money(n){ return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP'}).format(n); }
-  function syncBadge(){ badge.textContent = cart.reduce((a,i)=>a+i.qty,0); }
+
+  function money(n){
+    return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP'}).format(n);
+  }
+
+  function syncBadge(){
+    badge.textContent = cart.reduce((a,i)=>a+i.qty,0);
+  }
 
   function addItem(name, price){
     const it = cart.find(i=>i.name===name);
     it ? it.qty++ : cart.push({name, price, qty:1});
     renderCart(); syncBadge();
   }
-  function addDemo(){ addItem('Pack alimento 10kg', 24990); addItem('Aporte vacuna anual', 8000); }
-  function removeItem(name){ const idx = cart.findIndex(i=>i.name===name); if(idx>-1) cart.splice(idx,1); renderCart(); syncBadge(); }
+
+  function addDemo(){
+    addItem('Pack alimento 10kg', 24990);
+    addItem('Aporte vacuna anual', 8000);
+  }
+
+  function removeItem(name){
+    const idx = cart.findIndex(i=>i.name===name);
+    if(idx>-1) cart.splice(idx,1);
+    renderCart(); syncBadge();
+  }
+
   function changeQty(name, q){
     const it = cart.find(i=>i.name===name); if(!it) return;
-    it.qty = Math.max(1, parseInt(q||'1',10)); renderCart(); syncBadge();
+    it.qty = Math.max(1, parseInt(q||'1',10));
+    renderCart(); syncBadge();
   }
-  function clearCart(){ cart.splice(0, cart.length); renderCart(); syncBadge(); }
+
+  function clearCart(){
+    cart.splice(0, cart.length);
+    renderCart(); syncBadge();
+  }
 
   function renderCart(){
     const tbody = document.querySelector('#cartTable tbody');
@@ -623,81 +829,54 @@
     document.getElementById('total').innerHTML = `<strong>${money(total)}</strong>`;
   }
 
+  // ----- DOCS / WEBPAY -----
   function previewDoc(title){
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalBody').innerHTML = `
-      <p><b>${title}</b> (mock).</p>
-      <ul>
-        <li>Folio/ID, fecha y hora</li>
-        <li>Datos clave (animal, adoptante/usuario)</li>
-        <li>QR/Hash de verificación</li>
-        <li>Firma digital</li>
-      </ul>`;
+      <p><b>${title}</b> (mock).</p>`;
     document.getElementById('modal').style.display='flex';
   }
-  function closeModal(){ document.getElementById('modal').style.display='none'; }
+
+  function closeModal(){
+    document.getElementById('modal').style.display='none';
+  }
 
   function downloadPDF(fileName, title, bodyLines = []) {
-  // Verifica que jsPDF esté cargado
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("No se cargó jsPDF. Revisa tu conexión o el link CDN.");
-    return;
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("No se cargó jsPDF. Revisa tu conexión o el link CDN.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Bonnie SIRA — Refugio & Adopciones", 14, 18);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(title, 14, 30);
+
+    const now = new Date();
+    doc.setFontSize(10);
+    doc.text(`Fecha emisión: ${now.toLocaleString("es-CL")}`, 14, 38);
+
+    let y = 50;
+    doc.setFontSize(11);
+
+    if (bodyLines.length === 0) {
+      bodyLines = ["Documento generado por prototipo educativo."];
+    }
+
+    bodyLines.forEach(line => {
+      doc.text(line, 14, y);
+      y += 7;
+      if (y > 280) { doc.addPage(); y = 20; }
+    });
+
+    doc.save(fileName);
   }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  // Encabezado
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("Bonnie SIRA — Refugio & Adopciones", 14, 18);
-
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text(title, 14, 30);
-
-  // Fecha
-  const now = new Date();
-  doc.setFontSize(10);
-  doc.text(`Fecha emisión: ${now.toLocaleString("es-CL")}`, 14, 38);
-
-  // Cuerpo
-  let y = 50;
-  doc.setFontSize(11);
-
-  if (bodyLines.length === 0) {
-    bodyLines = [
-      "Documento generado por prototipo educativo.",
-      "Incluye datos simulados.",
-      "",
-      "Elementos mínimos:",
-      "• Folio/ID",
-      "• Fecha y hora",
-      "• Identificación animal/adoptante",
-      "• QR/Hash de verificación",
-      "• Firma digital",
-    ];
-  }
-
-  bodyLines.forEach(line => {
-    doc.text(line, 14, y);
-    y += 7;
-    if (y > 280) { doc.addPage(); y = 20; }
-  });
-
-  // Guardar
-  doc.save(fileName);
-}
-
-function downloadCSV(fileName, csvText) {
-  const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
 
   function openWebpay(){
     if(cart.length===0){ alert('Tu carro está vacío.'); return; }
@@ -706,36 +885,39 @@ function downloadCSV(fileName, csvText) {
     if(!name || !email){ alert('Completa Nombre y Email para continuar.'); return; }
     document.getElementById('webpay').style.display='flex';
   }
-  function closeWebpay(){ document.getElementById('webpay').style.display='none'; }
+
+  function closeWebpay(){
+    document.getElementById('webpay').style.display='none';
+  }
+
   function confirmWebpay(ok){
     closeWebpay();
     if(ok){
       alert('Pago autorizado (simulación). Se generó Boleta/Comprobante.');
-     downloadPDF(
-  "Boleta_Webpay.pdf",
-  "Boleta / Comprobante Webpay",
-  [
-    "Orden: WB-552199",
-    "Tipo: " + document.getElementById("purchaseType").value,
-    "Comprador: " + document.getElementById("buyerName").value,
-    "Email: " + document.getElementById("buyerEmail").value,
-    "",
-    "Detalle:",
-    ...cart.map(i => `• ${i.qty} x ${i.name} — ${money(i.price * i.qty)}`),
-    "",
-    "Total pagado: " + document.getElementById("total").innerText,
-    "Estado: AUTHORIZED",
-    "",
-    "Gracias por apoyar a Bonnie SIRA"
-  ]
-);
-; clearCart();
-    }else{ alert('Pago cancelado (simulación).'); }
+      downloadPDF(
+        "Boleta_Webpay.pdf",
+        "Boleta / Comprobante Webpay",
+        [
+          "Orden: WB-552199",
+          "Tipo: " + document.getElementById("purchaseType").value,
+          "Comprador: " + document.getElementById("buyerName").value,
+          "Email: " + document.getElementById("buyerEmail").value,
+          "",
+          "Detalle:",
+          ...cart.map(i => `• ${i.qty} x ${i.name} — ${money(i.price * i.qty)}`),
+          "",
+          "Total pagado: " + document.getElementById("total").innerText,
+          "Estado: AUTHORIZED"
+        ]
+      );
+      clearCart();
+    }else{
+      alert('Pago cancelado (simulación).');
+    }
   }
 
-  renderCart(); syncBadge();
+  renderCart(); syncBadge(); actualizarEntradas();
 </script>
 
 </body>
 </html>
-
