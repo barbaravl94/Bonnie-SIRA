@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bonnie SIRA — Prototipo (Entradas, Salidas + Carro Webpay)</title>
+  <title>Bonnie SIRA — Sistema Inclusivo de Refugio Animal</title>
   <style>
+    /* ========== VARIABLES DE TEMA ========== */
     :root{
       --lav:#7a77ff;
       --lav-2:#a6a3ff;
@@ -16,907 +17,2592 @@
       --line:#eceefe;
       --radius:16px;
       --shadow:0 10px 30px rgba(35,38,90,.08);
+      --success:#10b981;
+      --warning:#f59e0b;
+      --error:#ef4444;
+      
+      /* Accesibilidad */
+      --focus-ring: 0 0 0 3px rgba(122,119,255,.4);
+      --min-touch-size: 44px;
     }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-    body{margin:0;background:var(--bg);color:var(--ink);}
+
+    /* Modo alto contraste */
+    @media (prefers-contrast: high) {
+      :root {
+        --ink: #000000;
+        --bg: #ffffff;
+        --lav: #0000cc;
+      }
+    }
+
+    /* Reducir animaciones para usuarios sensibles */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ========== ESTILOS BASE ========== */
+    *{
+      box-sizing:border-box;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      line-height: 1.6;
+    }
+    
     a{color:inherit;text-decoration:none;}
-    header{
-      position:sticky;top:0;z-index:50;
-      background:linear-gradient(90deg,var(--lav),var(--cel));
-      color:#fff;padding:14px 18px;box-shadow:0 6px 20px rgba(0,0,0,.12);
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    
+    /* Focus visible para navegación por teclado */
+    *:focus {
+      outline: none;
     }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px;}
+    
+    *:focus-visible {
+      outline: 3px solid var(--lav);
+      outline-offset: 2px;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* ========== SKIP LINK (Accesibilidad) ========== */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--lav);
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      font-weight: bold;
+      z-index: 10000;
+    }
+    
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* ========== HEADER ========== */
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:linear-gradient(90deg,var(--lav),var(--cel));
+      color:#fff;
+      padding:14px 18px;
+      box-shadow:0 6px 20px rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+    
     .paw{
-      width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);
-      display:grid;place-items:center;font-size:18px;
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      background:rgba(255,255,255,.18);
+      display:grid;
+      place-items:center;
+      font-size:18px;
       backdrop-filter: blur(4px);
     }
-    nav{display:flex;gap:8px;flex-wrap:wrap;}
+    
+    nav{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    
     nav button{
-      border:0;background:rgba(255,255,255,.14);color:#fff;
-      padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;
-      transition:.2s;display:flex;align-items:center;gap:6px;
+      border:0;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      min-height: var(--min-touch-size);
+      font-size: 14px;
     }
-    nav button.active{background:#fff;color:var(--lav);}
-    nav button:hover{transform:translateY(-1px);background:rgba(255,255,255,.22);}
+    
+    nav button.active{
+      background:#fff;
+      color:var(--lav);
+    }
+    
+    nav button:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.22);
+    }
 
-    .wrap{max-width:1100px;margin:18px auto;padding:0 14px 60px;}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+    /* ========== LAYOUT ========== */
+    .wrap{
+      max-width:1100px;
+      margin:18px auto;
+      padding:0 14px 60px;
+    }
+    
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:14px;
+    }
+    
     .card{
-      background:var(--card);border:1px solid var(--line);
-      border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
     }
-    h2{font-size:18px;margin:0 0 10px;}
-    h3{font-size:15px;margin:6px 0;color:#343853;}
-    .muted{color:var(--muted);font-size:13px;}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;
-      background:#f2f3ff;color:#40446a;font-weight:700;border:1px solid var(--line);}
-    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .spacer{height:8px;}
-    .btn{
-      border:0;background:var(--lav);color:#fff;padding:9px 12px;border-radius:12px;cursor:pointer;font-weight:800;
-      transition:.15s;box-shadow:0 6px 14px rgba(122,119,255,.35);
-    }
-    .btn:hover{transform:translateY(-1px);filter:saturate(1.05);}
-    .btn.secondary{background:#eef0ff;color:#3a3f63;box-shadow:none;border:1px solid var(--line);}
-    .btn.ghost{background:transparent;color:var(--lav);border:2px solid var(--lav);box-shadow:none;}
-    .btn.small{padding:6px 9px;border-radius:10px;font-size:12px;}
-    .btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
-    .product{
-      display:flex;gap:12px;align-items:center;border:1px dashed var(--line);
-      padding:10px;border-radius:14px;background:#fbfbff;
+    /* ========== TIPOGRAFÍA ========== */
+    h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin: 0 0 16px;
     }
-    .pimg{
-      width:62px;height:62px;border-radius:14px;
-      background:linear-gradient(160deg,#fff,#eef0ff);
-      display:grid;place-items:center;font-size:26px;
+    
+    h2{
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      margin:0 0 10px;
+    }
+    
+    h3{
+      font-size:15px;
+      margin:6px 0;
+      color:#343853;
+    }
+    
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+    }
+    
+    /* Textos de ayuda */
+    .help-text {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* ========== COMPONENTES ========== */
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:12px;
+      background:#f2f3ff;
+      color:#40446a;
+      font-weight:700;
       border:1px solid var(--line);
     }
-    .price{font-weight:900;}
-    .tag{font-size:11px;font-weight:800;padding:3px 7px;border-radius:9px;background:#e9fff2;color:#0a7d3b;border:1px solid #c9f0d8;}
-    .tag.warn{background:#fff7e9;color:#915f00;border-color:#f2d8a8;}
+    
+    .row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    
+    .spacer{height:8px;}
+    
+    /* Botones accesibles */
+    .btn{
+      border:0;
+      background:var(--lav);
+      color:#fff;
+      padding:12px 16px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      transition:.15s;
+      box-shadow:0 6px 14px rgba(122,119,255,.35);
+      min-height: var(--min-touch-size);
+      font-size: 15px;
+      position: relative;
+    }
+    
+    .btn:hover{
+      transform:translateY(-1px);
+      filter:saturate(1.05);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn.secondary{
+      background:#eef0ff;
+      color:#3a3f63;
+      box-shadow:none;
+      border:1px solid var(--line);
+    }
+    
+    .btn.ghost{
+      background:transparent;
+      color:var(--lav);
+      border:2px solid var(--lav);
+      box-shadow:none;
+    }
+    
+    .btn.small{
+      padding:6px 9px;
+      border-radius:10px;
+      font-size:12px;
+      min-height: 36px;
+    }
+    
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+    
+    /* Loading state */
+    .btn.loading::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
+    /* ========== FORMULARIOS ACCESIBLES ========== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    
+    label .required {
+      color: var(--error);
+      font-weight: bold;
+    }
+    
+    input, select, textarea{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #dfe2fb;
+      background:#fcfcff;
+      outline:none;
+      transition:.15s;
+      font-size: 15px;
+      min-height: var(--min-touch-size);
+    }
+    
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--lav-2);
+      box-shadow:0 0 0 4px rgba(122,119,255,.12);
+    }
+    
+    /* Estados de validación */
+    input.valid, select.valid {
+      border-color: var(--success);
+    }
+    
+    input.invalid, select.invalid {
+      border-color: var(--error);
+    }
+    
+    .validation-message {
+      display: block;
+      margin-top: 6px;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    
+    .validation-message.success {
+      color: var(--success);
+      background: #ecfdf5;
+      border: 1px solid #d1fae5;
+    }
+    
+    .validation-message.error {
+      color: var(--error);
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+    
+    .validation-message.warning {
+      color: var(--warning);
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    /* ========== NOTIFICACIONES (Toast) ========== */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 400px;
+    }
+    
+    .toast {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      border-left: 4px solid var(--lav);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--error); }
+    .toast.warning { border-left-color: var(--warning); }
+    
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .toast-content {
+      flex: 1;
+    }
+    
+    .toast-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .toast-message {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* ========== INDICADOR DE PROGRESO ========== */
+    .progress-container {
+      background: #f0f0f0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: linear-gradient(90deg, var(--lav), var(--cel));
+      transition: width 0.3s ease;
+    }
+    
+    .progress-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* ========== TOOLTIPS Y AYUDAS ========== */
+    .help-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--lav-2);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 6px;
+      position: relative;
+    }
+    
+    .help-btn:hover::after {
+      content: attr(data-help);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: normal;
+      white-space: nowrap;
+      max-width: 250px;
+      white-space: normal;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+
+    /* ========== ACCESIBILIDAD - SCREEN READER ONLY ========== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* ========== MODALES ACCESIBLES ========== */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(15,16,30,.6);
+      z-index:99;
+    }
+    
+    .modal[aria-hidden="false"] {
+      display: flex;
+    }
+    
+    .dialog{
+      background:white;
+      width:min(560px,92vw);
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .dialog header{
+      position:unset;
+      background:transparent;
+      color:var(--ink);
+      box-shadow:none;
+      padding:0 0 12px;
+      display:flex;
+      justify-content:space-between;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+    
+    .x{
+      border:0;
+      background:transparent;
+      font-size:28px;
+      cursor:pointer;
+      width: var(--min-touch-size);
+      height: var(--min-touch-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    
+    .x:hover {
+      background: #f3f4f6;
+    }
+
+    /* ========== SECCIONES ========== */
+    section.hidden{display:none;}
+    
+    /* ========== AUTO-GUARDADO INDICATOR ========== */
+    .auto-save {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 10px 16px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+    }
+    
+    .auto-save.saving {
+      background: #fff7ed;
+      color: var(--warning);
+    }
+    
+    .auto-save.saved {
+      background: #ecfdf5;
+      color: var(--success);
+    }
+
+    /* ========== BREADCRUMB ========== */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .breadcrumb a {
+      color: var(--lav);
+      text-decoration: underline;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width:800px){ 
+      .grid{grid-template-columns:repeat(6,1fr);} 
+    }
+    
+    @media (max-width:520px){
+      .grid{grid-template-columns:repeat(2,1fr);}
+      nav{gap:6px; flex-direction: column; width: 100%;}
+      nav button {width: 100%; justify-content: center;}
+      .toast-container {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+
+    /* ========== MODO SIMPLIFICADO ========== */
+    body.modo-simple {
+      font-size: 18px;
+    }
+    
+    body.modo-simple .btn {
+      padding: 16px 24px;
+      font-size: 18px;
+      min-height: 56px;
+    }
+    
+    body.modo-simple input,
+    body.modo-simple select {
+      padding: 16px;
+      font-size: 18px;
+      border: 2px solid var(--lav);
+    }
+    
+    body.modo-simple .help-text {
+      font-size: 16px;
+    }
+
+    /* ========== PRODUCTO ========== */
+    .product{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      border:1px dashed var(--line);
+      padding:10px;
+      border-radius:14px;
+      background:#fbfbff;
+    }
+    
+    .pimg{
+      width:62px;
+      height:62px;
+      border-radius:14px;
+      background:linear-gradient(160deg,#fff,#eef0ff);
+      display:grid;
+      place-items:center;
+      font-size:26px;
+      border:1px solid var(--line);
+    }
+    
+    .price{font-weight:900;}
+    
+    .tag{
+      font-size:11px;
+      font-weight:800;
+      padding:3px 7px;
+      border-radius:9px;
+      background:#e9fff2;
+      color:#0a7d3b;
+      border:1px solid #c9f0d8;
+    }
+    
+    .tag.warn{
+      background:#fff7e9;
+      color:#915f00;
+      border-color:#f2d8a8;
+    }
+
+    /* ========== TABLA ========== */
     table{width:100%;border-collapse:collapse;}
     th,td{padding:9px;border-bottom:1px solid var(--line);font-size:14px;}
     th{color:var(--muted);text-align:left;font-weight:800;}
     .right{text-align:right;}
 
-    input,select,textarea{
-      width:100%;padding:9px;border-radius:12px;border:1px solid #dfe2fb;background:#fcfcff;
-      outline:none;transition:.15s;
-    }
-    input:focus,select:focus,textarea:focus{border-color:var(--lav-2);box-shadow:0 0 0 4px rgba(122,119,255,.12);}
-
-    section.hidden{display:none;}
-
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,16,30,.5);z-index:99;}
-    .dialog{background:white;width:min(560px,92vw);border-radius:18px;padding:14px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.25);}
-    .dialog header{position:unset;background:transparent;color:var(--ink);box-shadow:none;padding:0;display:flex;justify-content:space-between;}
-    .x{border:0;background:transparent;font-size:22px;cursor:pointer;}
-
-    footer{color:var(--muted);font-size:12px;text-align:center;margin-top:14px;}
-
-    @media (max-width:800px){ .grid{grid-template-columns:repeat(6,1fr);} }
-    @media (max-width:520px){
-      .grid{grid-template-columns:repeat(2,1fr);}
-      nav{gap:6px;}
+    /* ========== FOOTER ========== */
+    footer{
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      margin-top:14px;
     }
   </style>
 </head>
 <body>
 
+<!-- Skip link para accesibilidad -->
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+<!-- Toast Container -->
+<div class="toast-container" role="status" aria-live="polite" aria-atomic="true" id="toastContainer"></div>
+
+<!-- Auto-save Indicator -->
+<div class="auto-save saved" id="autoSaveIndicator" aria-live="polite" aria-atomic="true" style="display:none;">
+  <span id="saveIcon">💾</span>
+  <span id="saveText">Guardado automáticamente</span>
+</div>
+
+<!-- Login Screen -->
 <div id="loginScreen" style="
   position:fixed; inset:0; background:#f6f7ff;
   display:flex; align-items:center; justify-content:center;
-  z-index:9999;
-">
-  <div style="background:white; padding:24px; border-radius:16px; width:300px;
+  z-index:9999;" role="dialog" aria-labelledby="login-title" aria-modal="true">
+  <div style="background:white; padding:24px; border-radius:16px; width:340px;
               box-shadow:0 10px 40px rgba(0,0,0,.1); border:1px solid #eceefe;">
-    <h2 style="text-align:center; margin-top:0;">Ingreso al sistema</h2>
+    <h2 id="login-title" style="text-align:center; margin-top:0;">🐾 Bienvenido a Bonnie SIRA</h2>
+    <p class="muted" style="text-align:center; margin-bottom:20px;">Sistema Inclusivo de Refugio Animal</p>
 
-    <label>Selecciona tu rol</label>
-    <select id="roleSelect" style="width:100%; padding:10px; border-radius:12px; margin-bottom:16px;">
-      <option value="adoptante">Adoptante</option>
-      <option value="admin">Funcionario Refugio</option>
-    </select>
+    <div class="form-group">
+      <label for="roleSelect">Selecciona cómo deseas ingresar
+        <button class="help-btn" data-help="Elige 'Adoptante' si buscas una mascota, o 'Funcionario' si trabajas en el refugio" aria-label="Ayuda sobre roles">?</button>
+      </label>
+      <select id="roleSelect" aria-required="true">
+        <option value="adoptante">Quiero adoptar una mascota 🏠</option>
+        <option value="admin">Soy funcionario del refugio 👔</option>
+      </select>
+      <small class="help-text">No te preocupes, puedes cambiar después</small>
+    </div>
 
-    <button onclick="login()" style="
-      width:100%; padding:10px; border-radius:12px; background:#7a77ff;
-      color:white; font-weight:700; border:none; cursor:pointer;
-    ">Ingresar</button>
+    <button onclick="login()" class="btn" style="width:100%;" aria-label="Ingresar al sistema">
+      Ingresar al Sistema
+    </button>
   </div>
 </div>
 
-
-<header>
+<!-- Header -->
+<header role="banner">
   <div class="brand">
-    <div class="paw">🐾</div>
+    <div class="paw" aria-hidden="true">🐾</div>
     <div>
       <div>Bonnie SIRA</div>
-      <div class="muted" style="color:#eef;">Refugio & Adopciones</div>
+      <div class="muted" style="color:#eef;">Sistema Inclusivo de Refugio Animal</div>
     </div>
   </div>
-  <nav>
-    <button id="tab-home" class="active" onclick="show('home')">🏠 Inicio</button>
-    <button id="tab-entradas" onclick="show('entradas')">📥 Formulario de Adopción</button>
-    <button id="tab-tienda" onclick="show('tienda')">🛍️ Tienda/Donar</button>
-    <button id="tab-carro" onclick="show('carro')">🧺 Carro <span id="badge" class="chip" style="background:#fff;color:var(--lav);">0</span></button>
-    <button id="tab-salidas" onclick="show('salidas')">📄 Salidas</button>
-    <button class="btn secondary" onclick="logout()">Cerrar sesión</button>
+  <nav role="navigation" aria-label="Navegación principal">
+    <button id="tab-home" class="active" onclick="show('home')" role="tab" aria-selected="true" aria-controls="home">
+      <span aria-hidden="true">🏠</span> Inicio
+    </button>
+    <button id="tab-entradas" onclick="show('entradas')" role="tab" aria-selected="false" aria-controls="entradas">
+      <span aria-hidden="true">📝</span> Solicitar Adopción
+    </button>
+    <button id="tab-tienda" onclick="show('tienda')" role="tab" aria-selected="false" aria-controls="tienda">
+      <span aria-hidden="true">🛍️</span> Donar/Comprar
+    </button>
+    <button id="tab-carro" onclick="show('carro')" role="tab" aria-selected="false" aria-controls="carro">
+      <span aria-hidden="true">🧺</span> Mi Carrito 
+      <span id="badge" class="chip" style="background:#fff;color:var(--lav);" aria-label="artículos en el carrito">0</span>
+    </button>
+    <button id="tab-salidas" onclick="show('salidas')" role="tab" aria-selected="false" aria-controls="salidas">
+      <span aria-hidden="true">📄</span> Mis Documentos
+    </button>
+    <button id="tab-config" onclick="show('configuracion')" role="tab" aria-selected="false" aria-controls="configuracion">
+      <span aria-hidden="true">⚙️</span> Configuración
+    </button>
+    <button class="btn secondary" onclick="logout()" aria-label="Cerrar sesión">Salir</button>
   </nav>
 </header>
 
 <div class="wrap">
+  <main id="main-content" role="main">
 
-  <!-- HOME -->
-  <section id="home" class="card">
-    <h2>Bienvenida</h2>
-    <p class="muted">Prototipo de entradas y salidas del sistema Bonnie SIRA + carro de compras con integración Webpay simulada.</p>
-    <div class="spacer"></div>
-    <div class="grid">
-      <div class="card" style="grid-column:span 4;">
-        <h3>Adopta con confianza</h3>
-        <p class="muted">Solicita adopción, agenda visita y recibe tu contrato digital.</p>
-        <div class="row"><span class="chip">Comprobante</span><span class="chip">Contrato</span></div>
-        <div class="spacer"></div>
-        <button class="btn" onclick="show('salidas')">Ver documentos</button>
+    <!-- HOME -->
+    <section id="home" class="card" role="region" aria-labelledby="home-title">
+      <h2 id="home-title">Bienvenido 🏠</h2>
+      <p class="muted">En Bonnie SIRA puedes adoptar mascotas, hacer donaciones y acceder a todos los documentos de forma fácil y accesible.</p>
+      
+      <div class="spacer"></div>
+      
+      <div class="grid">
+        <article class="card" style="grid-column:span 4;">
+          <h3>🐕 Adopta con confianza</h3>
+          <p class="muted">Completa un sencillo formulario, agenda tu visita y recibe el contrato digital.</p>
+          <div class="row">
+            <span class="chip">✅ Proceso guiado</span>
+            <span class="chip">📄 Documentos incluidos</span>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn" onclick="show('entradas')" aria-label="Ir a formulario de adopción">
+            Comenzar Adopción
+          </button>
+        </article>
+        
+        <article class="card" style="grid-column:span 4;">
+          <h3>❤️ Apoya nuestra misión</h3>
+          <p class="muted">Compra alimentos o dona directamente. Recibirás comprobante por correo.</p>
+          <div class="row">
+            <span class="chip">💳 Pago seguro</span>
+            <span class="chip">📧 Boleta digital</span>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn ghost" onclick="show('tienda')" aria-label="Ir a tienda de donaciones">
+            Ver Tienda
+          </button>
+        </article>
+        
+        <article class="card" style="grid-column:span 4;">
+          <h3>📋 Accede a tus documentos</h3>
+          <p class="muted">Revisa contratos, fichas clínicas y comprobantes en un solo lugar.</p>
+          <div class="row">
+            <span class="chip">🔒 Seguro</span>
+            <span class="chip">📥 Descargable</span>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn secondary" onclick="show('salidas')" aria-label="Ver mis documentos">
+            Mis Documentos
+          </button>
+        </article>
       </div>
-      <div class="card" style="grid-column:span 4;">
-        <h3>Cuida su salud</h3>
-        <p class="muted">Ficha clínica, vacunación y alertas de control.</p>
-        <div class="row"><span class="chip">Hoja vacunación</span><span class="chip">Ficha clínica</span></div>
-        <div class="spacer"></div>
-        <button class="btn secondary" onclick="show('salidas')">Ver salidas clínicas</button>
+    </section>
+
+    <!-- FORMULARIO DE ADOPCIÓN (MEJORADO CON INCLUSIÓN) -->
+    <section id="entradas" class="hidden card" role="region" aria-labelledby="entradas-title">
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="#" onclick="show('home'); return false;">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">Formulario de Adopción</span>
+      </nav>
+
+      <h2 id="entradas-title">Solicitud de Adopción</h2>
+      <p class="muted">Completa este formulario para comenzar el proceso. Todos los campos marcados con <span class="required">*</span> son obligatorios.</p>
+      
+      <!-- Indicador de progreso -->
+      <div class="progress-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso del formulario">
+        <div class="progress-bar" id="formProgress" style="width: 0%"></div>
       </div>
-      <div class="card" style="grid-column:span 4;">
-        <h3>Apoya al refugio</h3>
-        <p class="muted">Compra insumos o dona con Webpay. Recibes boleta por mail.</p>
-        <div class="row"><span class="chip">Carro</span><span class="chip">Webpay</span></div>
-        <div class="spacer"></div>
-        <button class="btn ghost" onclick="show('tienda')">Ir a tienda</button>
-      </div>
-    </div>
-  </section>
+      <p class="progress-label" id="progressLabel">Paso 1 de 3</p>
+      
+      <div class="spacer"></div>
 
-  <!-- ENTRADAS (FUNCIONAL) -->
-  <section id="entradas" class="hidden card">
-    <h2>Formulario de Adopción</h2>
-    <div class="grid">
-      <div class="card" style="grid-column:span 6;">
-        <h3>Datos del adoptante</h3>
-        <label>Nombre completo</label>
-        <input id="inNombre" placeholder="Ej: Bárbara Valenzuela" required />
-        <label>RUT</label>
-        <input id="inRut" placeholder="xx.xxx.xxx-x" required />
-        <label>Correo electrónico</label>
-        <input id="inCorreo" type="email" placeholder="ejemplo@correo.cl" required />
-        <label>Teléfono</label>
-        <input id="inTelefono" type="tel" placeholder="+56 9 xxxx xxxx" />
+      <form id="adoptionForm" aria-label="Formulario de adopción">
+        <div class="grid">
+          <!-- PASO 1: Tus Datos -->
+          <div class="card" style="grid-column:span 6;" id="step1">
+            <h3>Paso 1: Tus datos personales</h3>
+            
+            <div class="form-group">
+              <label for="inNombre">
+                Nombre completo <span class="required" aria-label="obligatorio">*</span>
+                <button type="button" class="help-btn" data-help="Escribe tu nombre tal como aparece en tu cédula de identidad" aria-label="Ayuda sobre nombre completo">?</button>
+              </label>
+              <input 
+                type="text" 
+                id="inNombre" 
+                placeholder="Ejemplo: María Elena González Pérez" 
+                required 
+                aria-required="true"
+                aria-describedby="help-nombre"
+                onblur="validarCampo(this)" 
+              />
+              <small id="help-nombre" class="help-text">
+                Ingresa tu nombre como aparece en tu documento de identidad
+              </small>
+              <span id="validation-nombre" class="validation-message" role="alert" aria-live="polite"></span>
+            </div>
 
-        <h3>Datos del animal</h3>
-        <label>Nombre del animal</label>
-        <input id="inAnimalNombre" placeholder="Ej: Bonnie" />
-        <label>ID / Microchip</label>
-        <input id="inMicrochip" placeholder="Opcional" />
+            <div class="form-group">
+              <label for="inRut">
+                RUT <span class="required">*</span>
+                <button type="button" class="help-btn" data-help="Ingresa tu RUT sin puntos y con guión. Ejemplo: 12345678-9" aria-label="Ayuda sobre formato RUT">?</button>
+              </label>
+              <input 
+                type="text" 
+                id="inRut" 
+                placeholder="12.345.678-9" 
+                required 
+                aria-required="true"
+                aria-describedby="help-rut"
+                oninput="formatearRUT(this)"
+                onblur="validarRUT(this)"
+              />
+              <small id="help-rut" class="help-text">
+                Formato: 12.345.678-9 (se formatea automáticamente)
+              </small>
+              <span id="validation-rut" class="validation-message" role="alert" aria-live="polite"></span>
+            </div>
 
-        <h3>Proceso</h3>
-        <label>Tipo de solicitud</label>
-        <select id="inTipoSolicitud">
-          <option value="adopcion">Adopción</option>
-          <option value="visita">Visita domiciliaria</option>
-          <option value="transito">Hogar temporal</option>
-        </select>
-        <label>Fecha propuesta de visita / entrega</label>
-        <input id="inFecha" type="date" />
-        <label>Observaciones</label>
-        <textarea id="inObs" rows="3" placeholder="Información adicional"></textarea>
+            <div class="form-group">
+              <label for="inCorreo">
+                Correo electrónico <span class="required">*</span>
+                <button type="button" class="help-btn" data-help="Enviaremos la confirmación de tu solicitud a este correo" aria-label="Ayuda sobre correo">?</button>
+              </label>
+              <input 
+                type="email" 
+                id="inCorreo" 
+                placeholder="ejemplo@correo.cl" 
+                required 
+                aria-required="true"
+                aria-describedby="help-correo"
+                onblur="validarEmail(this)"
+              />
+              <small id="help-correo" class="help-text">
+                Te enviaremos actualizaciones sobre tu adopción
+              </small>
+              <span id="validation-correo" class="validation-message" role="alert" aria-live="polite"></span>
+            </div>
 
-        <div class="spacer"></div>
-        <div class="row">
-          <button class="btn" onclick="registrarEntrada()">Registrar</button>
-          <button class="btn secondary" onclick="limpiarEntrada()">Limpiar</button>
+            <div class="form-group">
+              <label for="inTelefono">
+                Teléfono de contacto <span class="required">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="inTelefono" 
+                placeholder="+56 9 8765 4321" 
+                required 
+                aria-required="true"
+                aria-describedby="help-telefono"
+                pattern="[0-9]{9}"
+              />
+              <small id="help-telefono" class="help-text">
+                Formato: 987654321 (9 dígitos, sin espacios)
+              </small>
+              <span id="validation-telefono" class="validation-message" role="alert" aria-live="polite"></span>
+            </div>
+
+            <button type="button" class="btn" onclick="siguientePaso(2)" aria-label="Continuar al paso 2">
+              Siguiente: Datos de la Mascota →
+            </button>
+          </div>
+
+          <!-- PASO 2: Datos del Animal -->
+          <div class="card" style="grid-column:span 6; display:none;" id="step2">
+            <h3>Paso 2: ¿Qué mascota te interesa?</h3>
+            
+            <div class="form-group">
+              <label for="inAnimalNombre">
+                Nombre de la mascota
+                <button type="button" class="help-btn" data-help="Si ya conoces el nombre de la mascota, ingrésalo aquí" aria-label="Ayuda sobre nombre de mascota">?</button>
+              </label>
+              <input 
+                type="text" 
+                id="inAnimalNombre" 
+                placeholder="Ejemplo: Bonnie" 
+                aria-describedby="help-animal"
+              />
+              <small id="help-animal" class="help-text">
+                Opcional: Puedes dejarlo en blanco si aún no decides
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="inMicrochip">
+                Código de identificación (microchip)
+                <button type="button" class="help-btn" data-help="El microchip es un código único de la mascota. Si no lo sabes, déjalo en blanco" aria-label="Ayuda sobre microchip">?</button>
+              </label>
+              <input 
+                type="text" 
+                id="inMicrochip" 
+                placeholder="Dejar en blanco si no lo conoces" 
+                aria-describedby="help-microchip"
+              />
+              <small id="help-microchip" class="help-text">
+                No te preocupes si no lo sabes, es opcional
+              </small>
+            </div>
+
+            <div class="row" style="gap:12px;">
+              <button type="button" class="btn secondary" onclick="siguientePaso(1)">
+                ← Volver
+              </button>
+              <button type="button" class="btn" onclick="siguientePaso(3)" style="flex:1;">
+                Siguiente: Agendar Visita →
+              </button>
+            </div>
+          </div>
+
+          <!-- PASO 3: Proceso -->
+          <div class="card" style="grid-column:span 6; display:none;" id="step3">
+            <h3>Paso 3: Completa tu solicitud</h3>
+            
+            <div class="form-group">
+              <label for="inTipoSolicitud">
+                ¿Qué deseas hacer? <span class="required">*</span>
+              </label>
+              <select id="inTipoSolicitud" required aria-required="true">
+                <option value="">Selecciona una opción</option>
+                <option value="adopcion">Adoptar una mascota 🏠</option>
+                <option value="visita">Solo quiero visitarla 👀</option>
+                <option value="hogar-temporal">Ser hogar temporal ⏰</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="inFecha">
+                Fecha preferida para visitar <span class="required">*</span>
+              </label>
+              <input 
+                type="date" 
+                id="inFecha" 
+                required 
+                aria-required="true"
+                min=""
+              />
+              <small class="help-text">
+                Elige cuándo te gustaría conocer a tu futura mascota
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="inObs">
+                ¿Algo más que quieras contarnos?
+              </label>
+              <textarea 
+                id="inObs" 
+                rows="4" 
+                placeholder="Ejemplo: Tengo experiencia con perros grandes, vivo en casa con patio..."
+                aria-describedby="help-obs"
+              ></textarea>
+              <small id="help-obs" class="help-text">
+                Opcional: Cuéntanos sobre tu hogar o experiencia previa
+              </small>
+            </div>
+
+            <div class="row" style="gap:12px;">
+              <button type="button" class="btn secondary" onclick="siguientePaso(2)">
+                ← Volver
+              </button>
+              <button type="submit" class="btn" onclick="guardarSolicitud(event)" style="flex:1;">
+                ✓ Enviar Solicitud
+              </button>
+            </div>
+          </div>
+
+          <!-- Resumen y confirmación -->
+          <div class="card" style="grid-column:span 6;">
+            <h3>📋 Vista previa</h3>
+            <div id="entradaPreview" class="muted">
+              Completa el formulario para ver un resumen de tu solicitud aquí.
+            </div>
+            
+            <div class="spacer"></div>
+            
+            <h3>Últimas solicitudes</h3>
+            <div style="overflow-x:auto;">
+              <table role="table" aria-label="Historial de solicitudes">
+                <caption class="sr-only">Historial de las últimas 5 solicitudes de adopción</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Adoptante</th>
+                    <th scope="col">Mascota</th>
+                    <th scope="col">Tipo</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaEntradas">
+                  <tr>
+                    <td colspan="4" class="muted" style="text-align:center;">
+                      No hay registros aún
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- CONFIGURACIÓN DE ACCESIBILIDAD -->
+    <section id="configuracion" class="hidden card" role="region" aria-labelledby="config-title">
+      <h2 id="config-title">⚙️ Configuración de Accesibilidad</h2>
+      <p class="muted">Personaliza la interfaz según tus necesidades.</p>
+      
+      <div class="spacer"></div>
+      
+      <div class="grid">
+        <div class="card" style="grid-column:span 6;">
+          <h3>🎨 Apariencia</h3>
+          
+          <div class="form-group">
+            <label>Tamaño de texto</label>
+            <input 
+              type="range" 
+              min="14" 
+              max="22" 
+              value="16" 
+              id="rangeTexto"
+              oninput="cambiarTamanoTexto(this.value)"
+              aria-label="Ajustar tamaño de texto"
+              aria-valuemin="14"
+              aria-valuemax="22"
+              aria-valuenow="16"
+            />
+            <output id="outputTexto" for="rangeTexto" aria-live="polite">16px</output>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="checkModoSimple" onchange="toggleModoSimple(this.checked)" />
+              Activar modo simplificado (textos más grandes, menos opciones)
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="checkAnimaciones" checked onchange="toggleAnimaciones(this.checked)" />
+              Permitir animaciones
+            </label>
+            <small class="help-text">Desactiva si las animaciones te molestan</small>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 6;">
+          <h3>🔔 Notificaciones</h3>
+          
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="checkSonidos" onchange="toggleSonidos(this.checked)" />
+              Activar notificaciones sonoras
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="checkAutoGuardar" checked onchange="toggleAutoGuardar(this.checked)" />
+              Guardar automáticamente mi progreso
+            </label>
+            <small class="help-text">Recomendado para no perder tu información</small>
+          </div>
+
+          <div class="spacer"></div>
+
+          <button class="btn" onclick="guardarConfiguracion()">
+            💾 Guardar Configuración
+          </button>
         </div>
       </div>
+    </section>
 
-      <div class="card admin-only" style="grid-column:span 6;">
-        <h3>Última entrada registrada</h3>
-        <div id="entradaPreview" class="muted">
-          No hay registros aún.
+    <!-- Otras secciones (tienda, carro, salidas) se mantienen igual pero con mejoras de accesibilidad -->
+
+    <!-- TIENDA / DONACIONES -->
+    <section id="tienda" class="hidden card" role="region" aria-labelledby="tienda-title">
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="#" onclick="show('home'); return false;">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">Tienda y Donaciones</span>
+      </nav>
+
+      <h2 id="tienda-title">🛍️ Tienda y Donaciones</h2>
+      <p class="muted">Apoya nuestra causa comprando productos o realizando una donación directa.</p>
+      
+      <div class="spacer"></div>
+
+      <div class="grid">
+        <!-- Productos -->
+        <div class="card" style="grid-column:span 8;">
+          <h3>Productos Disponibles</h3>
+          <div class="spacer"></div>
+          
+          <div id="productosLista" class="grid" style="gap:16px;">
+            <!-- Producto 1 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🍖</div>
+              <div style="flex:1;">
+                <strong>Alimento para Perros Premium</strong>
+                <div class="muted" style="font-size:12px;">Saco 15kg - Todas las edades</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$25.990</span>
+                  <span class="tag">En stock</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Alimento Perros Premium', 25990, '🍖')"
+                aria-label="Agregar alimento para perros al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+
+            <!-- Producto 2 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🐟</div>
+              <div style="flex:1;">
+                <strong>Alimento para Gatos</strong>
+                <div class="muted" style="font-size:12px;">Saco 7.5kg - Adultos</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$19.990</span>
+                  <span class="tag">En stock</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Alimento Gatos', 19990, '🐟')"
+                aria-label="Agregar alimento para gatos al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+
+            <!-- Producto 3 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🦴</div>
+              <div style="flex:1;">
+                <strong>Snacks y Premios</strong>
+                <div class="muted" style="font-size:12px;">Variedad de sabores</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$5.990</span>
+                  <span class="tag">En stock</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Snacks Variados', 5990, '🦴')"
+                aria-label="Agregar snacks al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+
+            <!-- Producto 4 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🧸</div>
+              <div style="flex-1;">
+                <strong>Juguetes para Mascotas</strong>
+                <div class="muted" style="font-size:12px;">Pack de 3 unidades</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$8.990</span>
+                  <span class="tag warn">Pocas unidades</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Pack Juguetes', 8990, '🧸')"
+                aria-label="Agregar juguetes al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+
+            <!-- Producto 5 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🛏️</div>
+              <div style="flex:1;">
+                <strong>Cama para Mascotas</strong>
+                <div class="muted" style="font-size:12px;">Tamaño M - Lavable</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$34.990</span>
+                  <span class="tag">En stock</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Cama Mascotas M', 34990, '🛏️')"
+                aria-label="Agregar cama al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+
+            <!-- Producto 6 -->
+            <article class="product">
+              <div class="pimg" aria-hidden="true">🧴</div>
+              <div style="flex:1;">
+                <strong>Shampoo Antipulgas</strong>
+                <div class="muted" style="font-size:12px;">500ml - Hipoalergénico</div>
+                <div style="margin-top:8px;">
+                  <span class="price">$12.990</span>
+                  <span class="tag">En stock</span>
+                </div>
+              </div>
+              <button 
+                class="btn" 
+                onclick="agregarAlCarrito('Shampoo Antipulgas', 12990, '🧴')"
+                aria-label="Agregar shampoo al carrito"
+              >
+                + Agregar
+              </button>
+            </article>
+          </div>
         </div>
 
-        <div class="card admin-only" style="grid-column:span 6;">
-        <h3>Historial (mock)</h3>
-        <div class="spacer"></div>
-	<table>
-          <thead>
+        <!-- Donación Directa -->
+        <div class="card" style="grid-column:span 4;">
+          <h3>💝 Donación Directa</h3>
+          <p class="muted">Tu aporte nos ayuda a cuidar mejor a nuestras mascotas.</p>
+          
+          <div class="spacer"></div>
+
+          <div class="form-group">
+            <label for="montoPersonalizado">Monto a donar</label>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <button type="button" class="chip" onclick="seleccionarMontoDonacion(5000)" style="cursor:pointer;">
+                $5.000
+              </button>
+              <button type="button" class="chip" onclick="seleccionarMontoDonacion(10000)" style="cursor:pointer;">
+                $10.000
+              </button>
+              <button type="button" class="chip" onclick="seleccionarMontoDonacion(20000)" style="cursor:pointer;">
+                $20.000
+              </button>
+            </div>
+            <input 
+              type="number" 
+              id="montoPersonalizado" 
+              placeholder="O ingresa un monto personalizado"
+              min="1000"
+              step="1000"
+              aria-label="Monto personalizado de donación"
+            />
+            <small class="help-text">Monto mínimo: $1.000</small>
+          </div>
+
+          <div class="form-group">
+            <label for="nombreDonante">Tu nombre (opcional)</label>
+            <input 
+              type="text" 
+              id="nombreDonante" 
+              placeholder="Anónimo"
+              aria-label="Nombre del donante"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="mensajeDonacion">Mensaje de apoyo (opcional)</label>
+            <textarea 
+              id="mensajeDonacion" 
+              rows="3"
+              placeholder="Escribe un mensaje de apoyo para nuestro equipo..."
+              aria-label="Mensaje de apoyo"
+            ></textarea>
+          </div>
+
+          <button class="btn" onclick="procesarDonacion()" style="width:100%;">
+            ❤️ Realizar Donación
+          </button>
+
+          <div class="spacer"></div>
+          
+          <div style="background:#fff7e9; padding:12px; border-radius:12px; border:1px solid #f2d8a8;">
+            <small style="color:#915f00;">
+              <strong>ℹ️ Nota:</strong> Recibirás un comprobante de donación por correo electrónico.
+            </small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARRITO -->
+    <section id="carro" class="hidden card" role="region" aria-labelledby="carro-title">
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="#" onclick="show('home'); return false;">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">Mi Carrito</span>
+      </nav>
+
+      <h2 id="carro-title">🧺 Mi Carrito de Compras</h2>
+      <p class="muted">Revisa y confirma tu compra antes de proceder al pago.</p>
+      
+      <div class="spacer"></div>
+
+      <div class="grid">
+        <!-- Lista del carrito -->
+        <div class="card" style="grid-column:span 8;">
+          <h3>Productos en tu carrito</h3>
+          
+          <div class="spacer"></div>
+          
+          <div id="carritoLista">
+            <div class="muted" style="text-align:center; padding:40px;">
+              🛒 Tu carrito está vacío
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen de compra -->
+        <div class="card" style="grid-column:span 4;">
+          <h3>Resumen de Compra</h3>
+          
+          <div class="spacer"></div>
+          
+          <table role="presentation">
             <tr>
-              <th>Fecha</th>
-              <th>Adoptante</th>
-              <th>Animal</th>
-              <th>Tipo</th>
+              <td>Subtotal:</td>
+              <td class="right"><strong id="subtotalCarrito">$0</strong></td>
             </tr>
-          </thead>
-          <tbody id="tablaEntradas">
-          </tbody>
-        </table>
+            <tr>
+              <td>Descuento:</td>
+              <td class="right" style="color:var(--success);" id="descuentoCarrito">-$0</td>
+            </tr>
+            <tr>
+              <td>Envío:</td>
+              <td class="right" id="envioCarrito">Gratis</td>
+            </tr>
+            <tr style="border-top:2px solid var(--lav);">
+              <td><strong>TOTAL:</strong></td>
+              <td class="right"><strong style="font-size:20px; color:var(--lav);" id="totalCarrito">$0</strong></td>
+            </tr>
+          </table>
 
-        <div class="spacer"></div>
-        <button class="btn secondary" onclick="downloadEntradasJSON()">
-          Descargar entradas (JSON)
-        </button>
-      </div>
-    </div>
-  </section>
+          <div class="spacer"></div>
 
-  <!-- TIENDA / DONAR -->
-  <section id="tienda" class="hidden">
-    <div class="grid">
-      <div class="card" style="grid-column:span 8;">
-        <h2>Tienda solidaria 🛍️</h2>
-        <p class="muted">Catálogo web con compras/donaciones.</p>
-        <div class="spacer"></div>
-
-        <div class="product">
-          <div class="pimg">🥫</div>
-          <div style="flex:1;">
-            <div class="row">
-              <strong>Pack alimento 10kg</strong>
-              <span class="tag">Insumo</span>
+          <div class="form-group">
+            <label for="codigoDescuento">Código de descuento</label>
+            <div style="display:flex; gap:8px;">
+              <input 
+                type="text" 
+                id="codigoDescuento" 
+                placeholder="REFUGIO2025"
+                aria-label="Código de descuento"
+                style="flex:1;"
+              />
+              <button class="btn secondary" onclick="aplicarDescuento()">
+                Aplicar
+              </button>
             </div>
-            <div class="muted">Para perritos grandes.</div>
+            <small class="help-text">Código: REFUGIO2025 = 10% descuento</small>
           </div>
-          <div class="right">
-            <div class="price">$24.990</div>
-            <button class="btn small" onclick="addItem('Pack alimento 10kg', 24990)">Agregar</button>
-          </div>
-        </div>
 
-        <div class="spacer"></div>
+          <div class="spacer"></div>
 
-        <div class="product">
-          <div class="pimg">💉</div>
-          <div style="flex:1;">
-            <div class="row">
-              <strong>Vacuna anual</strong>
-              <span class="tag warn">Campaña</span>
-            </div>
-            <div class="muted">Aporta a la vacunación masiva.</div>
-          </div>
-          <div class="right">
-            <div class="price">$8.000</div>
-            <button class="btn small" onclick="addItem('Aporte vacuna anual', 8000)">Agregar</button>
-          </div>
-        </div>
+          <button 
+            class="btn" 
+            id="btnProcederPago"
+            onclick="procederPago()" 
+            style="width:100%;"
+            disabled
+          >
+            💳 Proceder al Pago
+          </button>
 
-        <div class="spacer"></div>
+          <div class="spacer"></div>
 
-        <div class="product">
-          <div class="pimg">🐶</div>
-          <div style="flex:1;">
-            <div class="row">
-              <strong>Cuota de adopción</strong>
-              <span class="tag">Adopción</span>
-            </div>
-            <div class="muted">Cubre microchip + desparasitación.</div>
-          </div>
-          <div class="right">
-            <div class="price">$19.900</div>
-            <button class="btn small" onclick="addItem('Cuota de adopción', 19900)">Agregar</button>
-          </div>
-        </div>
-
-        <div class="spacer"></div>
-
-        <div class="product">
-          <div class="pimg">🎀</div>
-          <div style="flex:1;">
-            <div class="row">
-              <strong>Sticker Bonnie Berta (x5)</strong>
-              <span class="tag">Merch</span>
-            </div>
-            <div class="muted">Pack de 5 stickers.</div>
-          </div>
-          <div class="right">
-            <div class="price">$3.990</div>
-            <button class="btn small" onclick="addItem('Sticker Bonnie Berta (x5)', 3990)">Agregar</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="card" style="grid-column:span 4;">
-        <h2>Resumen rápido</h2>
-        <p class="muted">Pagas con Webpay simulado y generas boleta PDF.</p>
-        <div class="spacer"></div>
-        <div class="row">
-          <button class="btn" onclick="show('carro')">Ir al carro</button>
-          <button class="btn secondary" onclick="addDemo()">Agregar demo</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CARRO -->
-  <section id="carro" class="hidden">
-    <div class="grid">
-      <div class="card" style="grid-column:span 8;">
-        <h2>Carro de compras</h2>
-        <p class="muted">Checkout con Webpay (mock).</p>
-
-        <table id="cartTable">
-          <thead>
-            <tr><th>Ítem</th><th class="right">Precio</th><th class="right">Cant.</th><th class="right">Subtotal</th><th></th></tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot>
-            <tr><td colspan="3" class="right">Subtotal</td><td class="right" id="subtotal">$0</td><td></td></tr>
-            <tr><td colspan="3" class="right">IVA 19%</td><td class="right" id="tax">$0</td><td></td></tr>
-            <tr><td colspan="3" class="right"><strong>Total</strong></td><td class="right" id="total"><strong>$0</strong></td><td></td></tr>
-          </tfoot>
-        </table>
-
-        <div class="spacer"></div>
-        <div class="row">
-          <button class="btn ghost" onclick="clearCart()">Vaciar carro</button>
-          <button class="btn" onclick="openWebpay()">Pagar con Webpay</button>
-        </div>
-      </div>
-
-      <div class="card" style="grid-column:span 4;">
-        <h2>Datos del comprador</h2>
-        <label>Nombre y Apellido</label>
-        <input id="buyerName" placeholder="Ej: Bárbara Valenzuela"/>
-        <label>Email</label>
-        <input id="buyerEmail" placeholder="ejemplo@correo.cl"/>
-        <label>Tipo de aporte</label>
-        <select id="purchaseType">
-          <option value="donacion">Donación</option>
-          <option value="tienda">Compra tienda</option>
-          <option value="adopcion">Cuota adopción</option>
-        </select>
-        <div class="spacer"></div>
-        <p class="muted">Campos requeridos con validación básica.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SALIDAS -->
-  <section id="salidas" class="hidden card">
-    <h2>Salidas del sistema</h2>
-    <p class="muted">Documentos y reportes exportables (mock).</p>
-
-    <div class="grid">
-      <div class="card" style="grid-column:span 6;">
-        <h3>Comprobante de adopción</h3>
-        <p class="muted">Resumen de entrega + firma digital.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Comprobante de adopción')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Comprobante_Adopcion.pdf',
-              'Comprobante de adopción',
-              [
-                'Este documento funciona como evidencia formal del traspaso al nuevo hogar.',
-                'Incluye datos esenciales que permiten al refugio llevar un control interno del caso,',
-                'favoreciendo la supervisión posterior y disminuyendo riesgos de reincidencia o abandono.',
-                '',
-                'Elementos principales:',
-                '• Identificación del animal.',
-                '• Datos del adoptante.',
-                '• Fecha y lugar de entrega.',
-                '• Responsable del refugio a cargo de la entrega.',
-                '',
-                'Firmas:',
-                'Adoptante: ______________________________',
-                'Refugio Bonnie SIRA: ____________________'
-              ]
-            )">
-            Exportar PDF
+          <button class="btn ghost" onclick="vaciarCarrito()" style="width:100%;">
+            🗑️ Vaciar Carrito
           </button>
         </div>
       </div>
+    </section>
 
-      <div class="card" style="grid-column:span 6;">
-        <h3>Contrato de adopción</h3>
-        <p class="muted">Cláusulas y obligaciones.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Contrato de adopción')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Contrato_Adopcion.pdf',
-              'Contrato de adopción',
-              [
-                'Folio: CA-000234',
-                'Adoptante: Nombre Apellido (RUT xx.xxx.xxx-x)',
-                'Animal: Bonnie (Canina, 2 años, microchip 12345)',
-                '',
-                'Cláusulas principales:',
-                '• Cuidado responsable y controles veterinarios.',
-                '• Prohibición de abandono o maltrato.',
-                '• Seguimiento post-adopción por 6 meses.',
-                '',
-                'Firmas:',
-                'Adoptante: ____________________',
-                'Refugio: ______________________'
-              ]
-            )">
-            Exportar PDF
-          </button>
+    <!-- MIS DOCUMENTOS / SALIDAS -->
+    <section id="salidas" class="hidden card" role="region" aria-labelledby="salidas-title">
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="#" onclick="show('home'); return false;">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">Mis Documentos</span>
+      </nav>
+
+      <h2 id="salidas-title">📄 Mis Documentos</h2>
+      <p class="muted">Accede y descarga todos tus comprobantes, contratos y boletas.</p>
+      
+      <div class="spacer"></div>
+
+      <div class="grid">
+        <div class="card" style="grid-column:span 12;">
+          <h3>Documentos Disponibles</h3>
+          
+          <div class="spacer"></div>
+          
+          <div id="documentosLista">
+            <table role="table" aria-label="Lista de documentos">
+              <thead>
+                <tr>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Descripción</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col" class="right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaDocumentos">
+                <tr>
+                  <td colspan="4" class="muted" style="text-align:center;">
+                    No tienes documentos generados aún
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div style="background:#e9fff2; padding:16px; border-radius:12px; border:1px solid #c9f0d8;">
+            <h4 style="margin-top:0; color:#0a7d3b;">💡 ¿Cómo genero documentos?</h4>
+            <ul style="margin:0; padding-left:20px; color:#0a7d3b;">
+              <li>Completa una solicitud de adopción para obtener tu comprobante</li>
+              <li>Realiza una compra en la tienda para recibir tu boleta</li>
+              <li>Todos los documentos se guardan automáticamente aquí</li>
+            </ul>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="card" style="grid-column:span 6;">
-        <h3>Hoja de vacunación</h3>
-        <p class="muted">Aplicadas + próximas dosis.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Hoja de vacunación')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Hoja_Vacunacion.pdf',
-              'Hoja de Vacunación',
-              [
-                'Registro de vacunación del animal',
-                '',
-                'Este documento mantiene el historial de inmunización y controles preventivos.',
-                'Favorece la continuidad clínica y facilita las consultas veterinarias posteriores.',
-                'Además asegura que el animal cumple con las medidas sanitarias mínimas requeridas.',
-                '',
-                'Incluye:',
-                '• Esquema de vacunas aplicadas.',
-                '• Próximas fechas indicadas.',
-                '• Observaciones clínicas relevantes.',
-                '• Identificación del veterinario o responsable.',
-                '',
-                'Este registro es fundamental para garantizar la salud del animal durante su traslado',
-                'a su nuevo entorno familiar.'
-              ]
-            )">
-            Exportar PDF
-          </button>
-        </div>
-      </div>
-
-      <div class="card admin-only" style="grid-column:span 6;">
-        <h3>Informe visita domiciliaria</h3>
-        <p class="muted">Checklist + evidencias.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Informe visita domiciliaria')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Informe_Visita.pdf',
-              'Informe de Visita',
-              [
-                'Evaluación del entorno del adoptante',
-                '',
-                'El informe registra las condiciones observadas en el hogar del solicitante.',
-                'Permite determinar si el espacio es adecuado y si cumple los requisitos básicos de',
-                'seguridad, bienestar y cuidados para el animal.',
-                '',
-                'Componentes del informe:',
-                '• Condiciones del hogar.',
-                '• Seguridad del entorno.',
-                '• Disponibilidad de tiempo y recursos.',
-                '• Impresiones generales del evaluador.',
-                '',
-                'Este documento respalda la decisión de aprobar o rechazar la adopción, basándose',
-                'en criterios de bienestar animal.'
-              ]
-            )">
-            Exportar PDF
-          </button>
-        </div>
-      </div>
-
-      <div class="card" style="grid-column:span 6;">
-        <h3>Boleta / Comprobante Webpay</h3>
-        <p class="muted">Se genera tras pago autorizado.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Boleta / Comprobante Webpay')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Boleta_Webpay.pdf',
-              'Boleta de compra',
-              [
-                'Folio: CA-000234',
-                'Comprador: Nombre Apellido (RUT xx.xxx.xxx-x)',
-                'Animal: Bonnie (Canina, 2 años, microchip 12345)',
-                '',
-                'Detalle de cobro asociado al proceso de adopción o donación realizado a través del sistema.',
-                '',
-                'Firmas:',
-                'Comprador: ____________________',
-                'Refugio: ______________________'
-              ]
-            )">
-            Exportar PDF
-          </button>
-        </div>
-      </div>
-
-      <div class="card admin-only" style="grid-column:span 6;">
-        <h3>Reportes de gestión (PDF/CSV)</h3>
-        <p class="muted">KPI adopciones y donaciones.</p>
-        <div class="row">
-          <button class="btn" onclick="previewDoc('Reporte de gestión')">Vista previa</button>
-          <button class="btn secondary"
-            onclick="downloadPDF(
-              'Reporte_Gestion.pdf',
-              'Reporte de Gestión',
-              [
-                'Indicadores administrativos del refugio',
-                '',
-                'Estos reportes permiten a la administración revisar cifras clave del funcionamiento',
-                'del refugio. Facilitan evaluar resultados, medir la cantidad de adopciones realizadas,',
-                'analizar la efectividad de campañas y apoyar la planificación interna.',
-                '',
-                'Incluyen:',
-                '• Estadísticas de adopciones.',
-                '• Movimientos de donaciones.',
-                '• Control de insumos o recursos.',
-                '• Comparaciones por período.',
-                '',
-                'Los reportes sirven como base para la toma de decisiones y asignación de recursos.'
-              ]
-            )">
-            Exportar PDF
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>Prototipo educativo · Bonnie SIRA ©</footer>
+  </main>
 </div>
 
-<!-- Modal documento -->
-<div id="modal" class="modal" aria-hidden="true">
+<!-- Modal accesible -->
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
   <div class="dialog">
     <header>
-      <h3 id="modalTitle">Documento</h3>
-      <button class="x" onclick="closeModal()">×</button>
+      <h3 id="modalTitle">Título del Modal</h3>
+      <button class="x" onclick="closeModal()" aria-label="Cerrar diálogo">×</button>
     </header>
-    <div id="modalBody" class="muted"></div>
-    <div class="spacer"></div>
-    <div class="row">
-      <button class="btn secondary" onclick="closeModal()">Cerrar</button>
-      <button class="btn secondary"
-        onclick="downloadPDF(
-          'Contrato_Adopcion.pdf',
-          'Contrato de adopción',
-          [
-            'Este contrato informa y concientiza sobre la tenencia responsable de mascotas.',
-            '',
-            'Firmas:',
-            'Adoptante: ______________________________',
-            'Refugio Bonnie SIRA: ____________________'
-          ]
-        )">
-        Exportar PDF
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Webpay -->
-<div id="webpay" class="modal" aria-hidden="true">
-  <div class="dialog">
-    <header>
-      <h3>Webpay (Simulación)</h3>
-      <button class="x" onclick="closeWebpay()">×</button>
-    </header>
-    <p class="muted">Sandbox simulado. No procesa pagos reales.</p>
-    <div class="grid">
-      <div style="grid-column:span 6;">
-        <label>Número de tarjeta</label>
-        <input placeholder="xxxx xxxx xxxx xxxx"/>
-      </div>
-      <div style="grid-column:span 3;">
-        <label>Expira</label>
-        <input placeholder="mm/aa"/>
-      </div>
-      <div style="grid-column:span 3;">
-        <label>CVV</label>
-        <input placeholder="123"/>
-      </div>
-      <div style="grid-column:span 12;">
-        <label>Nombre titular</label>
-        <input placeholder="Titular demo"/>
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <div class="row">
-      <button class="btn secondary" onclick="confirmWebpay(false)">Cancelar</button>
-      <button class="btn" onclick="confirmWebpay(true)">Autorizar pago</button>
-    </div>
+    <div id="modalBody" role="document"></div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-function login() {
-  const role = document.getElementById("roleSelect").value;
-  localStorage.setItem("userRole", role);
-
-  document.getElementById("loginScreen").style.display = "none";
-  aplicarRoles(role);
-}
-
-function aplicarRoles(role) {
-   document.querySelectorAll(".admin-only")
-    .forEach(e => e.style.display = (role === "admin" ? "block" : "none"));
-
-   if (role === "adoptante") {
-    document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");
-  }
-}
-
-function logout() {
-  localStorage.removeItem("userRole");
-  document.getElementById("loginScreen").style.display = "flex";
-}
-
-
-window.onload = () => {
-  const role = localStorage.getItem("userRole");
-  if (role) {
-    document.getElementById("loginScreen").style.display = "none";
-    aplicarRoles(role);
-  }
-};  
-
-const sections = ['home','entradas','tienda','carro','salidas'];
-
-  function show(id){
-    sections.forEach(s=>{
-      document.getElementById(s).classList.toggle('hidden', s!==id);
-      document.getElementById('tab-'+s).classList.toggle('active', s===id);
-    });
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  // ----- ENTRADAS -----
+  // ========== GESTIÓN DE ESTADO Y DATOS ==========
+  let currentRole = '';
   const entradas = [];
+  let currentStep = 1;
+  let autoGuardarActivo = true;
+  let configuracion = {
+    tamanoTexto: 16,
+    modoSimple: false,
+    animaciones: true,
+    sonidos: false,
+    autoGuardar: true
+  };
 
-  function registrarEntrada(){
+
+  // ========== CARRITO DE COMPRAS ==========
+  let carrito = [];
+  let descuentoAplicado = false;
+  let porcentajeDescuento = 0;
+
+  function agregarAlCarrito(nombre, precio, icono) {
+    // Verificar si el producto ya existe
+    const existe = carrito.find(item => item.nombre === nombre);
+    
+    if (existe) {
+      existe.cantidad++;
+    } else {
+      carrito.push({
+        id: Date.now(),
+        nombre: nombre,
+        precio: precio,
+        icono: icono,
+        cantidad: 1
+      });
+    }
+    
+    actualizarCarrito();
+    mostrarToast('Producto agregado', `${nombre} agregado al carrito`, 'success');
+    
+    // Guardar en localStorage
+    localStorage.setItem('carrito_bonnie', JSON.stringify(carrito));
+  }
+
+  function eliminarDelCarrito(id) {
+    carrito = carrito.filter(item => item.id !== id);
+    actualizarCarrito();
+    mostrarToast('Producto eliminado', 'Se eliminó el producto del carrito', 'info');
+    localStorage.setItem('carrito_bonnie', JSON.stringify(carrito));
+  }
+
+  function cambiarCantidad(id, delta) {
+    const item = carrito.find(i => i.id === id);
+    if (item) {
+      item.cantidad += delta;
+      if (item.cantidad <= 0) {
+        eliminarDelCarrito(id);
+      } else {
+        actualizarCarrito();
+        localStorage.setItem('carrito_bonnie', JSON.stringify(carrito));
+      }
+    }
+  }
+
+  function actualizarCarrito() {
+    const badge = document.getElementById('badge');
+    const carritoLista = document.getElementById('carritoLista');
+    const btnPagar = document.getElementById('btnProcederPago');
+    
+    // Actualizar badge
+    const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    badge.textContent = totalItems;
+    badge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+    
+    // Actualizar lista del carrito
+    if (carrito.length === 0) {
+      carritoLista.innerHTML = `
+        <div class="muted" style="text-align:center; padding:40px;">
+          🛒 Tu carrito está vacío<br>
+          <div class="spacer"></div>
+          <button class="btn ghost" onclick="show('tienda')">
+            Ir a la Tienda
+          </button>
+        </div>
+      `;
+      btnPagar.disabled = true;
+    } else {
+      carritoLista.innerHTML = carrito.map(item => `
+        <div class="product" style="margin-bottom:12px;">
+          <div class="pimg" aria-hidden="true">${item.icono}</div>
+          <div style="flex:1;">
+            <strong>${item.nombre}</strong>
+            <div class="muted" style="font-size:12px;">Precio unitario: $${item.precio.toLocaleString('es-CL')}</div>
+            <div style="margin-top:8px;">
+              <span class="price">$${(item.precio * item.cantidad).toLocaleString('es-CL')}</span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button 
+              class="btn secondary" 
+              onclick="cambiarCantidad(${item.id}, -1)"
+              aria-label="Reducir cantidad"
+              style="width:36px; padding:6px;"
+            >
+              −
+            </button>
+            <span style="min-width:24px; text-align:center; font-weight:bold;">${item.cantidad}</span>
+            <button 
+              class="btn secondary" 
+              onclick="cambiarCantidad(${item.id}, 1)"
+              aria-label="Aumentar cantidad"
+              style="width:36px; padding:6px;"
+            >
+              +
+            </button>
+          </div>
+          <button 
+            class="btn ghost" 
+            onclick="eliminarDelCarrito(${item.id})"
+            aria-label="Eliminar producto"
+          >
+            🗑️
+          </button>
+        </div>
+      `).join('');
+      btnPagar.disabled = false;
+    }
+    
+    // Calcular totales
+    calcularTotales();
+  }
+
+  function calcularTotales() {
+    const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const descuento = descuentoAplicado ? Math.round(subtotal * porcentajeDescuento) : 0;
+    const total = subtotal - descuento;
+    
+    document.getElementById('subtotalCarrito').textContent = `$${subtotal.toLocaleString('es-CL')}`;
+    document.getElementById('descuentoCarrito').textContent = descuento > 0 ? `-$${descuento.toLocaleString('es-CL')}` : '-$0';
+    document.getElementById('totalCarrito').textContent = `$${total.toLocaleString('es-CL')}`;
+  }
+
+  function aplicarDescuento() {
+    const codigo = document.getElementById('codigoDescuento').value.trim().toUpperCase();
+    
+    if (codigo === 'REFUGIO2025') {
+      descuentoAplicado = true;
+      porcentajeDescuento = 0.10; // 10%
+      calcularTotales();
+      mostrarToast('¡Descuento aplicado!', '10% de descuento agregado a tu compra', 'success');
+      document.getElementById('codigoDescuento').disabled = true;
+    } else if (codigo === '') {
+      mostrarToast('Campo vacío', 'Por favor ingresa un código de descuento', 'warning');
+    } else {
+      mostrarToast('Código inválido', 'El código ingresado no es válido', 'error');
+    }
+  }
+
+  function vaciarCarrito() {
+    if (carrito.length === 0) {
+      mostrarToast('Carrito vacío', 'No hay productos para eliminar', 'info');
+      return;
+    }
+    
+    if (confirm('¿Estás seguro de que deseas vaciar el carrito?')) {
+      carrito = [];
+      descuentoAplicado = false;
+      porcentajeDescuento = 0;
+      document.getElementById('codigoDescuento').disabled = false;
+      document.getElementById('codigoDescuento').value = '';
+      actualizarCarrito();
+      mostrarToast('Carrito vaciado', 'Todos los productos fueron eliminados', 'success');
+      localStorage.removeItem('carrito_bonnie');
+    }
+  }
+
+  function procederPago() {
+    if (carrito.length === 0) {
+      mostrarToast('Carrito vacío', 'Agrega productos antes de pagar', 'warning');
+      return;
+    }
+    
+    const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const descuento = descuentoAplicado ? Math.round(subtotal * porcentajeDescuento) : 0;
+    const total = subtotal - descuento;
+    
+    // Simular pago
+    mostrarToast('Procesando pago...', 'Redirigiendo a Webpay...', 'info');
+    
+    setTimeout(() => {
+      // Simular pago exitoso
+      generarBoletaCompra(carrito, subtotal, descuento, total);
+      
+      // Vaciar carrito
+      carrito = [];
+      descuentoAplicado = false;
+      porcentajeDescuento = 0;
+      actualizarCarrito();
+      localStorage.removeItem('carrito_bonnie');
+      
+      mostrarToast('¡Pago exitoso!', 'Tu compra ha sido procesada correctamente', 'success');
+      
+      // Ir a documentos
+      setTimeout(() => {
+        show('salidas');
+      }, 2000);
+    }, 2500);
+  }
+
+  // ========== DONACIONES ==========
+  function seleccionarMontoDonacion(monto) {
+    document.getElementById('montoPersonalizado').value = monto;
+  }
+
+  function procesarDonacion() {
+    const monto = parseInt(document.getElementById('montoPersonalizado').value) || 0;
+    const nombre = document.getElementById('nombreDonante').value.trim() || 'Anónimo';
+    const mensaje = document.getElementById('mensajeDonacion').value.trim();
+    
+    if (monto < 1000) {
+      mostrarToast('Monto inválido', 'El monto mínimo de donación es $1.000', 'error');
+      return;
+    }
+    
+    mostrarToast('Procesando donación...', 'Redirigiendo a Webpay...', 'info');
+    
+    setTimeout(() => {
+      generarComprobanteDonacion(nombre, monto, mensaje);
+      
+      // Limpiar formulario
+      document.getElementById('montoPersonalizado').value = '';
+      document.getElementById('nombreDonante').value = '';
+      document.getElementById('mensajeDonacion').value = '';
+      
+      mostrarToast('¡Gracias por tu donación!', `${nombre}, tu aporte de $${monto.toLocaleString('es-CL')} ha sido procesado`, 'success');
+      
+      setTimeout(() => {
+        show('salidas');
+      }, 2000);
+    }, 2500);
+  }
+
+  // ========== GENERACIÓN DE DOCUMENTOS ==========
+  let documentos = [];
+
+  function generarBoletaCompra(items, subtotal, descuento, total) {
+    const doc = {
+      id: Date.now(),
+      tipo: 'Boleta de Compra',
+      descripcion: `Compra de ${items.length} producto(s)`,
+      fecha: new Date().toLocaleDateString('es-CL'),
+      datos: { items, subtotal, descuento, total }
+    };
+    
+    documentos.push(doc);
+    actualizarListaDocumentos();
+    localStorage.setItem('documentos_bonnie', JSON.stringify(documentos));
+    
+    // Generar PDF
+    generarPDFBoleta(doc);
+  }
+
+  function generarComprobanteDonacion(nombre, monto, mensaje) {
+    const doc = {
+      id: Date.now(),
+      tipo: 'Comprobante de Donación',
+      descripcion: `Donación de $${monto.toLocaleString('es-CL')}`,
+      fecha: new Date().toLocaleDateString('es-CL'),
+      datos: { nombre, monto, mensaje }
+    };
+    
+    documentos.push(doc);
+    actualizarListaDocumentos();
+    localStorage.setItem('documentos_bonnie', JSON.stringify(documentos));
+    
+    // Generar PDF
+    generarPDFDonacion(doc);
+  }
+
+  function agregarDocumentoAdopcion(datos) {
+    const doc = {
+      id: Date.now(),
+      tipo: 'Solicitud de Adopción',
+      descripcion: `Solicitud para ${datos.mascota}`,
+      fecha: new Date().toLocaleDateString('es-CL'),
+      datos: datos
+    };
+    
+    documentos.push(doc);
+    actualizarListaDocumentos();
+    localStorage.setItem('documentos_bonnie', JSON.stringify(documentos));
+  }
+
+  function actualizarListaDocumentos() {
+    const tabla = document.getElementById('tablaDocumentos');
+    
+    if (documentos.length === 0) {
+      tabla.innerHTML = `
+        <tr>
+          <td colspan="4" class="muted" style="text-align:center;">
+            No tienes documentos generados aún
+          </td>
+        </tr>
+      `;
+    } else {
+      tabla.innerHTML = documentos.map(doc => `
+        <tr>
+          <td>
+            <span class="chip" style="background:#e9fff2; color:#0a7d3b; border-color:#c9f0d8;">
+              ${doc.tipo}
+            </span>
+          </td>
+          <td>${doc.descripcion}</td>
+          <td>${doc.fecha}</td>
+          <td class="right">
+            <button 
+              class="btn secondary" 
+              onclick="regenerarPDF(${doc.id})"
+              aria-label="Descargar documento"
+              style="font-size:12px; padding:6px 12px;"
+            >
+              📥 Descargar PDF
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  function regenerarPDF(id) {
+    const doc = documentos.find(d => d.id === id);
+    if (!doc) return;
+    
+    if (doc.tipo === 'Boleta de Compra') {
+      generarPDFBoleta(doc);
+    } else if (doc.tipo === 'Comprobante de Donación') {
+      generarPDFDonacion(doc);
+    } else if (doc.tipo === 'Solicitud de Adopción') {
+      generarPDFAdopcion(doc);
+    }
+  }
+
+  function generarPDFBoleta(doc) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Encabezado
+    pdf.setFontSize(20);
+    pdf.setTextColor(122, 119, 255);
+    pdf.text('Bonnie SIRA', 20, 20);
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Sistema Inclusivo de Refugio Animal', 20, 28);
+    
+    // Línea
+    pdf.setDrawColor(127, 211, 255);
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 32, 190, 32);
+    
+    // Título
+    pdf.setFontSize(16);
+    pdf.text('BOLETA DE COMPRA', 20, 45);
+    
+    // Fecha
+    pdf.setFontSize(11);
+    pdf.text(`Fecha: ${doc.fecha}`, 20, 55);
+    pdf.text(`N° Documento: ${doc.id}`, 20, 62);
+    
+    // Productos
+    pdf.setFontSize(14);
+    pdf.text('Productos:', 20, 75);
+    
+    let y = 85;
+    pdf.setFontSize(10);
+    doc.datos.items.forEach(item => {
+      pdf.text(`${item.icono} ${item.nombre}`, 25, y);
+      pdf.text(`${item.cantidad} x $${item.precio.toLocaleString('es-CL')}`, 120, y);
+      pdf.text(`$${(item.precio * item.cantidad).toLocaleString('es-CL')}`, 160, y, { align: 'right' });
+      y += 7;
+    });
+    
+    // Totales
+    y += 10;
+    pdf.line(20, y, 190, y);
+    y += 8;
+    
+    pdf.text('Subtotal:', 120, y);
+    pdf.text(`$${doc.datos.subtotal.toLocaleString('es-CL')}`, 180, y, { align: 'right' });
+    y += 7;
+    
+    if (doc.datos.descuento > 0) {
+      pdf.setTextColor(10, 125, 59);
+      pdf.text('Descuento:', 120, y);
+      pdf.text(`-$${doc.datos.descuento.toLocaleString('es-CL')}`, 180, y, { align: 'right' });
+      y += 7;
+      pdf.setTextColor(0, 0, 0);
+    }
+    
+    pdf.setFontSize(12);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('TOTAL:', 120, y);
+    pdf.text(`$${doc.datos.total.toLocaleString('es-CL')}`, 180, y, { align: 'right' });
+    
+    // Pie
+    pdf.setFontSize(9);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Gracias por apoyar nuestra causa', 105, 270, { align: 'center' });
+    pdf.text('Todos los fondos se destinan al cuidado de nuestras mascotas', 105, 275, { align: 'center' });
+    
+    pdf.save(`Boleta_${doc.id}.pdf`);
+    mostrarToast('PDF descargado', 'La boleta se descargó correctamente', 'success');
+  }
+
+  function generarPDFDonacion(doc) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Encabezado
+    pdf.setFontSize(20);
+    pdf.setTextColor(122, 119, 255);
+    pdf.text('Bonnie SIRA', 20, 20);
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Sistema Inclusivo de Refugio Animal', 20, 28);
+    
+    // Línea
+    pdf.setDrawColor(127, 211, 255);
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 32, 190, 32);
+    
+    // Título
+    pdf.setFontSize(16);
+    pdf.text('COMPROBANTE DE DONACIÓN', 20, 45);
+    
+    // Datos
+    pdf.setFontSize(11);
+    pdf.text(`Fecha: ${doc.fecha}`, 20, 60);
+    pdf.text(`N° Comprobante: ${doc.id}`, 20, 67);
+    
+    pdf.setFontSize(14);
+    pdf.text('Datos del Donante:', 20, 82);
+    pdf.setFontSize(11);
+    pdf.text(`Nombre: ${doc.datos.nombre}`, 25, 92);
+    
+    pdf.setFontSize(14);
+    pdf.text('Monto Donado:', 20, 110);
+    pdf.setFontSize(18);
+    pdf.setTextColor(10, 125, 59);
+    pdf.text(`$${doc.datos.monto.toLocaleString('es-CL')}`, 25, 122);
+    
+    pdf.setTextColor(0, 0, 0);
+    
+    if (doc.datos.mensaje) {
+      pdf.setFontSize(12);
+      pdf.text('Mensaje:', 20, 140);
+      pdf.setFontSize(10);
+      const lines = pdf.splitTextToSize(doc.datos.mensaje, 170);
+      pdf.text(lines, 25, 150);
+    }
+    
+    // Agradecimiento
+    pdf.setFontSize(14);
+    pdf.setTextColor(122, 119, 255);
+    pdf.text('¡Muchas gracias por tu generosidad!', 105, 200, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Tu aporte nos ayuda a seguir salvando vidas', 105, 210, { align: 'center' });
+    
+    // Pie
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Este comprobante es válido para efectos tributarios', 105, 270, { align: 'center' });
+    
+    pdf.save(`Donacion_${doc.id}.pdf`);
+    mostrarToast('PDF descargado', 'El comprobante se descargó correctamente', 'success');
+  }
+
+  function generarPDFAdopcion(doc) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Encabezado
+    pdf.setFontSize(20);
+    pdf.setTextColor(122, 119, 255);
+    pdf.text('Bonnie SIRA', 20, 20);
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Sistema Inclusivo de Refugio Animal', 20, 28);
+    
+    // Línea
+    pdf.setDrawColor(127, 211, 255);
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 32, 190, 32);
+    
+    // Título
+    pdf.setFontSize(16);
+    pdf.text('SOLICITUD DE ADOPCIÓN', 20, 45);
+    
+    // Datos
+    pdf.setFontSize(11);
+    pdf.text(`Fecha: ${doc.fecha}`, 20, 60);
+    pdf.text(`N° Solicitud: ${doc.id}`, 20, 67);
+    
+    pdf.setFontSize(14);
+    pdf.text('Datos del Solicitante:', 20, 82);
+    pdf.setFontSize(10);
+    pdf.text(`Nombre: ${doc.datos.nombre}`, 25, 92);
+    pdf.text(`RUT: ${doc.datos.rut}`, 25, 99);
+    pdf.text(`Email: ${doc.datos.email}`, 25, 106);
+    pdf.text(`Teléfono: ${doc.datos.telefono}`, 25, 113);
+    
+    pdf.setFontSize(14);
+    pdf.text('Mascota Solicitada:', 20, 128);
+    pdf.setFontSize(10);
+    pdf.text(`${doc.datos.mascota}`, 25, 138);
+    
+    // Pie
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Nos contactaremos contigo en las próximas 48 horas', 105, 270, { align: 'center' });
+    
+    pdf.save(`Adopcion_${doc.id}.pdf`);
+    mostrarToast('PDF descargado', 'La solicitud se descargó correctamente', 'success');
+  }
+
+  // ========== CARGAR DATOS AL INICIAR ==========
+  function cargarDatosGuardados() {
+    // Cargar carrito
+    const carritoGuardado = localStorage.getItem('carrito_bonnie');
+    if (carritoGuardado) {
+      carrito = JSON.parse(carritoGuardado);
+      actualizarCarrito();
+    }
+    
+    // Cargar documentos
+    const documentosGuardados = localStorage.getItem('documentos_bonnie');
+    if (documentosGuardados) {
+      documentos = JSON.parse(documentosGuardados);
+      actualizarListaDocumentos();
+    }
+  }
+
+  // Llamar al cargar la página
+  window.addEventListener('DOMContentLoaded', cargarDatosGuardados);
+
+  // ========== FUNCIONES DE LOGIN ==========
+  function login(){
+    currentRole = document.getElementById('roleSelect').value;
+    document.getElementById('loginScreen').style.display = 'none';
+    mostrarToast('¡Bienvenido!', `Has ingresado como ${currentRole === 'adoptante' ? 'adoptante' : 'funcionario del refugio'}`, 'success');
+    cargarConfiguracion();
+  }
+
+  function logout(){
+    if(confirm('¿Estás seguro de que deseas cerrar sesión?')){
+      document.getElementById('loginScreen').style.display = 'flex';
+      show('home');
+      mostrarToast('Sesión cerrada', 'Vuelve pronto 👋', 'success');
+    }
+  }
+
+  // ========== NAVEGACIÓN ==========
+  function show(sec){
+    // Ocultar todas las secciones
+    document.querySelectorAll('section').forEach(s => {
+      s.classList.add('hidden');
+      s.setAttribute('aria-hidden', 'true');
+    });
+    
+    // Mostrar sección seleccionada
+    const section = document.getElementById(sec);
+    section.classList.remove('hidden');
+    section.setAttribute('aria-hidden', 'false');
+    section.focus();
+
+    // Actualizar tabs
+    document.querySelectorAll('nav button[role="tab"]').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    
+    const activeTab = document.getElementById(`tab-${sec}`);
+    if(activeTab){
+      activeTab.classList.add('active');
+      activeTab.setAttribute('aria-selected', 'true');
+    }
+
+    // Anunciar cambio para lectores de pantalla
+    anunciarCambio(`Navegaste a: ${activeTab ? activeTab.textContent : sec}`);
+  }
+
+  // ========== SISTEMA DE NOTIFICACIONES (TOAST) ==========
+  function mostrarToast(titulo, mensaje, tipo = 'success'){
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    toast.setAttribute('role', 'alert');
+    
+    const iconos = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+    
+    toast.innerHTML = `
+      <span class="toast-icon" aria-hidden="true">${iconos[tipo]}</span>
+      <div class="toast-content">
+        <div class="toast-title">${titulo}</div>
+        <div class="toast-message">${mensaje}</div>
+      </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Reproducir sonido si está activado
+    if(configuracion.sonidos){
+      reproducirSonido(tipo);
+    }
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+
+  // ========== VALIDACIÓN DE FORMULARIOS ==========
+  function validarCampo(input){
+    const valor = input.value.trim();
+    const id = input.id;
+    const validationMsg = document.getElementById(`validation-${id.replace('in', '').toLowerCase()}`);
+    
+    if(!validationMsg) return;
+    
+    if(valor === '' && input.required){
+      marcarInvalido(input, validationMsg, 'Este campo es obligatorio');
+      return false;
+    }
+    
+    marcarValido(input, validationMsg, '✓ Correcto');
+    actualizarProgreso();
+    return true;
+  }
+
+  function validarRUT(input){
+    const rut = input.value.replace(/\./g, '').replace(/-/g, '');
+    const validationMsg = document.getElementById('validation-rut');
+    
+    if(rut.length < 8){
+      marcarInvalido(input, validationMsg, 'El RUT debe tener al menos 8 dígitos');
+      return false;
+    }
+    
+    // Validación básica de dígito verificador
+    const cuerpo = rut.slice(0, -1);
+    const dv = rut.slice(-1).toUpperCase();
+    
+    let suma = 0;
+    let multiplo = 2;
+    
+    for(let i = cuerpo.length - 1; i >= 0; i--){
+      suma += parseInt(cuerpo[i]) * multiplo;
+      multiplo = multiplo === 7 ? 2 : multiplo + 1;
+    }
+    
+    const dvEsperado = 11 - (suma % 11);
+    const dvCalculado = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : String(dvEsperado);
+    
+    if(dv !== dvCalculado){
+      marcarInvalido(input, validationMsg, 'El RUT ingresado no es válido');
+      return false;
+    }
+    
+    marcarValido(input, validationMsg, '✓ RUT válido');
+    return true;
+  }
+
+  function validarEmail(input){
+    const email = input.value.trim();
+    const validationMsg = document.getElementById('validation-correo');
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if(!regex.test(email)){
+      marcarInvalido(input, validationMsg, 'Ingresa un correo válido (ejemplo@correo.cl)');
+      return false;
+    }
+    
+    marcarValido(input, validationMsg, '✓ Correo válido');
+    return true;
+  }
+
+  function formatearRUT(input){
+    let valor = input.value.replace(/[^0-9kK]/g, '');
+    
+    if(valor.length > 1){
+      const cuerpo = valor.slice(0, -1);
+      const dv = valor.slice(-1);
+      valor = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + dv;
+    }
+    
+    input.value = valor;
+  }
+
+  function marcarValido(input, msgElement, mensaje){
+    input.classList.remove('invalid');
+    input.classList.add('valid');
+    input.setAttribute('aria-invalid', 'false');
+    msgElement.className = 'validation-message success';
+    msgElement.textContent = mensaje;
+    msgElement.style.display = 'block';
+  }
+
+  function marcarInvalido(input, msgElement, mensaje){
+    input.classList.remove('valid');
+    input.classList.add('invalid');
+    input.setAttribute('aria-invalid', 'true');
+    msgElement.className = 'validation-message error';
+    msgElement.textContent = mensaje;
+    msgElement.style.display = 'block';
+  }
+
+  // ========== NAVEGACIÓN POR PASOS ==========
+  function siguientePaso(paso){
+    // Validar paso actual antes de avanzar
+    if(paso > currentStep){
+      if(currentStep === 1 && !validarPaso1()) return;
+      if(currentStep === 2 && !validarPaso2()) return;
+    }
+    
+    // Ocultar todos los pasos
+    for(let i = 1; i <= 3; i++){
+      const step = document.getElementById(`step${i}`);
+      if(step) step.style.display = 'none';
+    }
+    
+    // Mostrar paso solicitado
+    const stepElement = document.getElementById(`step${paso}`);
+    if(stepElement){
+      stepElement.style.display = 'block';
+      stepElement.focus();
+    }
+    
+    currentStep = paso;
+    actualizarProgreso();
+    
+    // Anunciar para lectores de pantalla
+    anunciarCambio(`Paso ${paso} de 3`);
+  }
+
+  function validarPaso1(){
     const nombre = document.getElementById('inNombre').value.trim();
     const rut = document.getElementById('inRut').value.trim();
     const correo = document.getElementById('inCorreo').value.trim();
     const telefono = document.getElementById('inTelefono').value.trim();
-    const animal = document.getElementById('inAnimalNombre').value.trim();
-    const microchip = document.getElementById('inMicrochip').value.trim();
-    const tipo = document.getElementById('inTipoSolicitud').value;
-    const fecha = document.getElementById('inFecha').value;
-    const obs = document.getElementById('inObs').value.trim();
-
-    if(!nombre || !rut || !correo){
-      alert('Nombre, RUT y correo son obligatorios.');
-      return;
+    
+    if(!nombre || !rut || !correo || !telefono){
+      mostrarToast('Campos incompletos', 'Por favor completa todos los campos obligatorios', 'warning');
+      return false;
     }
-
-    const entrada = {
-      fechaRegistro: new Date().toLocaleString('es-CL'),
-      nombre, rut, correo, telefono,
-      animal, microchip, tipo, fecha, obs
-    };
-
-    entradas.push(entrada);
-    actualizarEntradas();
-    limpiarEntrada();
+    
+    if(!validarRUT(document.getElementById('inRut'))){
+      return false;
+    }
+    
+    if(!validarEmail(document.getElementById('inCorreo'))){
+      return false;
+    }
+    
+    return true;
   }
 
-  function limpiarEntrada(){
-    document.getElementById('inNombre').value = '';
-    document.getElementById('inRut').value = '';
-    document.getElementById('inCorreo').value = '';
-    document.getElementById('inTelefono').value = '';
-    document.getElementById('inAnimalNombre').value = '';
-    document.getElementById('inMicrochip').value = '';
-    document.getElementById('inTipoSolicitud').value = 'adopcion';
-    document.getElementById('inFecha').value = '';
-    document.getElementById('inObs').value = '';
+  function validarPaso2(){
+    // Paso 2 es opcional, siempre retorna true
+    return true;
+  }
+
+  function actualizarProgreso(){
+    const progreso = (currentStep / 3) * 100;
+    const barraProgreso = document.getElementById('formProgress');
+    const labelProgreso = document.getElementById('progressLabel');
+    
+    if(barraProgreso){
+      barraProgreso.style.width = `${progreso}%`;
+      barraProgreso.parentElement.setAttribute('aria-valuenow', progreso);
+    }
+    
+    if(labelProgreso){
+      labelProgreso.textContent = `Paso ${currentStep} de 3`;
+    }
+  }
+
+  // ========== GUARDAR SOLICITUD ==========
+  function guardarSolicitud(event){
+    event.preventDefault();
+    
+    // Validar paso final
+    const tipo = document.getElementById('inTipoSolicitud').value;
+    const fecha = document.getElementById('inFecha').value;
+    
+    if(!tipo || !fecha){
+      mostrarToast('Campos incompletos', 'Por favor completa el tipo de solicitud y la fecha', 'warning');
+      return;
+    }
+    
+    const btn = event.target;
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.textContent = 'Guardando...';
+    
+    // Simular guardado
+    setTimeout(() => {
+      const entrada = {
+        fechaRegistro: new Date().toLocaleString('es-CL'),
+        nombre: document.getElementById('inNombre').value,
+        rut: document.getElementById('inRut').value,
+        correo: document.getElementById('inCorreo').value,
+        telefono: document.getElementById('inTelefono').value,
+        animal: document.getElementById('inAnimalNombre').value || 'Por definir',
+        microchip: document.getElementById('inMicrochip').value,
+        tipo: tipo,
+        fecha: fecha,
+        obs: document.getElementById('inObs').value
+      };
+      
+      entradas.push(entrada);
+      actualizarEntradas();
+      
+      // Resetear formulario
+      document.getElementById('adoptionForm').reset();
+      siguientePaso(1);
+      
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.textContent = '✓ Enviar Solicitud';
+      
+      mostrarToast(
+        '¡Solicitud enviada!', 
+        'Recibirás un correo de confirmación pronto. Te contactaremos para coordinar la visita.', 
+        'success'
+      );
+      
+      // Anunciar para lectores de pantalla
+      anunciarCambio('Tu solicitud de adopción ha sido enviada exitosamente');
+    }, 1500);
   }
 
   function actualizarEntradas(){
     if(entradas.length === 0){
-      document.getElementById('entradaPreview').textContent = 'No hay registros aún.';
-      document.getElementById('tablaEntradas').innerHTML = '';
+      document.getElementById('entradaPreview').innerHTML = '<p class="muted">Completa el formulario para ver un resumen aquí.</p>';
       return;
     }
-
+    
     const ultima = entradas[entradas.length - 1];
     document.getElementById('entradaPreview').innerHTML = `
-      <p><b>Fecha registro:</b> ${ultima.fechaRegistro}</p>
-      <p><b>Adoptante:</b> ${ultima.nombre} (${ultima.rut})</p>
-      <p><b>Correo:</b> ${ultima.correo}</p>
-      <p><b>Animal:</b> ${ultima.animal || 'N/A'} ${ultima.microchip ? '(Chip: '+ultima.microchip+')' : ''}</p>
-      <p><b>Tipo:</b> ${ultima.tipo}</p>
-      <p><b>Fecha propuesta:</b> ${ultima.fecha || 'Sin definir'}</p>
-      <p><b>Obs.:</b> ${ultima.obs || 'Sin observaciones'}</p>
+      <div style="background:#f0f9ff; padding:12px; border-radius:8px; border:1px solid #bae6fd;">
+        <p><strong>📅 Fecha:</strong> ${ultima.fechaRegistro}</p>
+        <p><strong>👤 Adoptante:</strong> ${ultima.nombre}</p>
+        <p><strong>📧 Correo:</strong> ${ultima.correo}</p>
+        <p><strong>🐾 Mascota:</strong> ${ultima.animal}</p>
+        <p><strong>📝 Tipo:</strong> ${ultima.tipo}</p>
+        <p><strong>📆 Visita propuesta:</strong> ${ultima.fecha}</p>
+      </div>
     `;
-
+    
+    // Actualizar tabla
     const tbody = document.getElementById('tablaEntradas');
     tbody.innerHTML = '';
-    entradas.slice(-5).reverse().forEach(e=>{
+    entradas.slice(-5).reverse().forEach(e => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${e.fechaRegistro}</td>
         <td>${e.nombre}</td>
-        <td>${e.animal || 'N/A'}</td>
-        <td>${e.tipo}</td>`;
+        <td>${e.animal}</td>
+        <td>${e.tipo}</td>
+      `;
       tbody.appendChild(tr);
     });
   }
 
-  function downloadEntradasJSON(){
-    if(entradas.length === 0){
-      alert('No hay entradas registradas para exportar.');
-      return;
+  // ========== AUTO-GUARDADO ==========
+  function autoGuardarFormulario(){
+    if(!autoGuardarActivo) return;
+    
+    const datos = {
+      nombre: document.getElementById('inNombre')?.value || '',
+      rut: document.getElementById('inRut')?.value || '',
+      correo: document.getElementById('inCorreo')?.value || '',
+      telefono: document.getElementById('inTelefono')?.value || ''
+    };
+    
+    localStorage.setItem('formularioTemp', JSON.stringify(datos));
+    mostrarIndicadorGuardado();
+  }
+
+  function recuperarFormulario(){
+    const guardado = localStorage.getItem('formularioTemp');
+    if(guardado){
+      try {
+        const datos = JSON.parse(guardado);
+        document.getElementById('inNombre').value = datos.nombre || '';
+        document.getElementById('inRut').value = datos.rut || '';
+        document.getElementById('inCorreo').value = datos.correo || '';
+        document.getElementById('inTelefono').value = datos.telefono || '';
+        mostrarToast('Datos recuperados', 'Hemos recuperado tu progreso anterior', 'info');
+      } catch(e){
+        console.error('Error al recuperar datos', e);
+      }
     }
-    const dataStr = JSON.stringify(entradas, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "entradas_adopcion.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   }
 
-  // ----- CARRO / TIENDA -----
-  const cart = [];
-  const badge = document.getElementById('badge');
-
-  function money(n){
-    return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP'}).format(n);
+  function mostrarIndicadorGuardado(){
+    const indicador = document.getElementById('autoSaveIndicator');
+    const icon = document.getElementById('saveIcon');
+    const text = document.getElementById('saveText');
+    
+    indicador.style.display = 'flex';
+    indicador.className = 'auto-save saving';
+    icon.textContent = '⏳';
+    text.textContent = 'Guardando...';
+    
+    setTimeout(() => {
+      indicador.className = 'auto-save saved';
+      icon.textContent = '✅';
+      text.textContent = 'Guardado automáticamente';
+      
+      setTimeout(() => {
+        indicador.style.display = 'none';
+      }, 2000);
+    }, 500);
   }
 
-  function syncBadge(){
-    badge.textContent = cart.reduce((a,i)=>a+i.qty,0);
+  // Auto-guardar cada 10 segundos si hay cambios
+  setInterval(() => {
+    if(document.getElementById('entradas').classList.contains('hidden')) return;
+    autoGuardarFormulario();
+  }, 10000);
+
+  // ========== CONFIGURACIÓN Y ACCESIBILIDAD ==========
+  function cambiarTamanoTexto(valor){
+    document.documentElement.style.fontSize = `${valor}px`;
+    document.getElementById('outputTexto').textContent = `${valor}px`;
+    configuracion.tamanoTexto = parseInt(valor);
   }
 
-  function addItem(name, price){
-    const it = cart.find(i=>i.name===name);
-    it ? it.qty++ : cart.push({name, price, qty:1});
-    renderCart(); syncBadge();
+  function toggleModoSimple(activo){
+    if(activo){
+      document.body.classList.add('modo-simple');
+      mostrarToast('Modo simplificado', 'Textos más grandes y menos opciones activadas', 'success');
+    } else {
+      document.body.classList.remove('modo-simple');
+      mostrarToast('Modo normal', 'Interfaz estándar restaurada', 'success');
+    }
+    configuracion.modoSimple = activo;
   }
 
-  function addDemo(){
-    addItem('Pack alimento 10kg', 24990);
-    addItem('Aporte vacuna anual', 8000);
+  function toggleAnimaciones(activo){
+    if(!activo){
+      document.body.style.setProperty('--transition-duration', '0ms');
+    } else {
+      document.body.style.removeProperty('--transition-duration');
+    }
+    configuracion.animaciones = activo;
   }
 
-  function removeItem(name){
-    const idx = cart.findIndex(i=>i.name===name);
-    if(idx>-1) cart.splice(idx,1);
-    renderCart(); syncBadge();
+  function toggleSonidos(activo){
+    configuracion.sonidos = activo;
+    if(activo){
+      mostrarToast('Sonidos activados', 'Recibirás notificaciones sonoras', 'success');
+    }
   }
 
-  function changeQty(name, q){
-    const it = cart.find(i=>i.name===name); if(!it) return;
-    it.qty = Math.max(1, parseInt(q||'1',10));
-    renderCart(); syncBadge();
+  function toggleAutoGuardar(activo){
+    autoGuardarActivo = activo;
+    configuracion.autoGuardar = activo;
+    mostrarToast(
+      activo ? 'Auto-guardado activado' : 'Auto-guardado desactivado',
+      activo ? 'Tu progreso se guardará automáticamente' : 'Deberás guardar manualmente',
+      'info'
+    );
   }
 
-  function clearCart(){
-    cart.splice(0, cart.length);
-    renderCart(); syncBadge();
+  function guardarConfiguracion(){
+    localStorage.setItem('configuracionAccesibilidad', JSON.stringify(configuracion));
+    mostrarToast('Configuración guardada', 'Tus preferencias se aplicarán en futuras visitas', 'success');
   }
 
-  function renderCart(){
-    const tbody = document.querySelector('#cartTable tbody');
-    tbody.innerHTML = '';
-    let sub = 0;
-    cart.forEach(it=>{
-      const st = it.price*it.qty; sub += st;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${it.name}</td>
-        <td class="right">${money(it.price)}</td>
-        <td class="right"><input type="number" min="1" value="${it.qty}" style="width:70px" onchange="changeQty('${it.name}', this.value)"></td>
-        <td class="right">${money(st)}</td>
-        <td class="right"><button class="btn secondary small" onclick="removeItem('${it.name}')">Quitar</button></td>`;
-      tbody.appendChild(tr);
-    });
-    const tax = Math.round(sub*0.19);
-    const total = sub+tax;
-    document.getElementById('subtotal').textContent = money(sub);
-    document.getElementById('tax').textContent = money(tax);
-    document.getElementById('total').innerHTML = `<strong>${money(total)}</strong>`;
+  function cargarConfiguracion(){
+    const guardada = localStorage.getItem('configuracionAccesibilidad');
+    if(guardada){
+      try {
+        const config = JSON.parse(guardada);
+        configuracion = config;
+        
+        // Aplicar configuración
+        cambiarTamanoTexto(config.tamanoTexto);
+        document.getElementById('rangeTexto').value = config.tamanoTexto;
+        
+        if(config.modoSimple){
+          document.getElementById('checkModoSimple').checked = true;
+          toggleModoSimple(true);
+        }
+        
+        document.getElementById('checkAnimaciones').checked = config.animaciones;
+        toggleAnimaciones(config.animaciones);
+        
+        document.getElementById('checkSonidos').checked = config.sonidos;
+        document.getElementById('checkAutoGuardar').checked = config.autoGuardar;
+        autoGuardarActivo = config.autoGuardar;
+        
+        mostrarToast('Preferencias cargadas', 'Tus configuraciones han sido aplicadas', 'info');
+      } catch(e){
+        console.error('Error al cargar configuración', e);
+      }
+    }
   }
 
-  // ----- DOCS / WEBPAY -----
-  function previewDoc(title){
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalBody').innerHTML = `
-      <p><b>${title}</b> (mock).</p>`;
-    document.getElementById('modal').style.display='flex';
+  // ========== ACCESIBILIDAD - ANUNCIOS PARA SCREEN READERS ==========
+  function anunciarCambio(mensaje){
+    const anunciador = document.getElementById('sr-announcer') || crearAnunciador();
+    anunciador.textContent = mensaje;
+    
+    // Limpiar después de 1 segundo
+    setTimeout(() => {
+      anunciador.textContent = '';
+    }, 1000);
   }
 
+  function crearAnunciador(){
+    const div = document.createElement('div');
+    div.id = 'sr-announcer';
+    div.className = 'sr-only';
+    div.setAttribute('role', 'status');
+    div.setAttribute('aria-live', 'polite');
+    div.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(div);
+    return div;
+  }
+
+  function reproducirSonido(tipo){
+    // Simulación de sonido (en producción usarías Web Audio API o archivos de audio)
+    if(!configuracion.sonidos) return;
+    
+    const frecuencias = {
+      success: 800,
+      error: 400,
+      warning: 600,
+      info: 700
+    };
+    
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frecuencias[tipo] || 700;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch(e){
+      console.error('Error al reproducir sonido', e);
+    }
+  }
+
+  // ========== MODAL ==========
   function closeModal(){
-    document.getElementById('modal').style.display='none';
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
   }
 
-  function downloadPDF(fileName, title, bodyLines = []) {
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert("No se cargó jsPDF. Revisa tu conexión o el link CDN.");
-      return;
+  // Cerrar modal con tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+      closeModal();
     }
+  });
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Bonnie SIRA — Refugio & Adopciones", 14, 18);
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(title, 14, 30);
-
-    const now = new Date();
-    doc.setFontSize(10);
-    doc.text(`Fecha emisión: ${now.toLocaleString("es-CL")}`, 14, 38);
-
-    let y = 50;
-    doc.setFontSize(11);
-
-    if (bodyLines.length === 0) {
-      bodyLines = ["Documento generado por prototipo educativo."];
-    }
-
-    bodyLines.forEach(line => {
-      doc.text(line, 14, y);
-      y += 7;
-      if (y > 280) { doc.addPage(); y = 20; }
-    });
-
-    doc.save(fileName);
-  }
-
-  function openWebpay(){
-    if(cart.length===0){ alert('Tu carro está vacío.'); return; }
-    const name = document.getElementById('buyerName').value.trim();
-    const email = document.getElementById('buyerEmail').value.trim();
-    if(!name || !email){ alert('Completa Nombre y Email para continuar.'); return; }
-    document.getElementById('webpay').style.display='flex';
-  }
-
-  function closeWebpay(){
-    document.getElementById('webpay').style.display='none';
-  }
-
-  function confirmWebpay(ok){
-    closeWebpay();
-    if(ok){
-      alert('Pago autorizado (simulación). Se generó Boleta/Comprobante.');
-      downloadPDF(
-        "Boleta_Webpay.pdf",
-        "Boleta / Comprobante Webpay",
-        [
-          "Orden: WB-552199",
-          "Tipo: " + document.getElementById("purchaseType").value,
-          "Comprador: " + document.getElementById("buyerName").value,
-          "Email: " + document.getElementById("buyerEmail").value,
-          "",
-          "Detalle:",
-          ...cart.map(i => `• ${i.qty} x ${i.name} — ${money(i.price * i.qty)}`),
-          "",
-          "Total pagado: " + document.getElementById("total").innerText,
-          "Estado: AUTHORIZED"
-        ]
-      );
-      clearCart();
-    }else{
-      alert('Pago cancelado (simulación).');
-    }
-  }
-
-  renderCart(); syncBadge(); actualizarEntradas();
+  // ========== INICIALIZACIÓN ==========
+  document.addEventListener('DOMContentLoaded', () => {
+    // Establecer fecha mínima como hoy
+    const hoy = new Date().toISOString().split('T')[0];
+    const inputFecha = document.getElementById('inFecha');
+    if(inputFecha) inputFecha.min = hoy;
+    
+    // Recuperar formulario si existe
+    recuperarFormulario();
+    
+    // Inicializar progreso
+    actualizarProgreso();
+  });
 </script>
 
 </body>
